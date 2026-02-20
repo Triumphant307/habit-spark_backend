@@ -23,8 +23,11 @@ export const completeHabit = async (id, date) => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new Error("Habit not found");
 
-  // toggleCompletion handles the DB write and returns true (added) / false (removed)
-  const isNowCompleted = await toggleCompletion(habit.id, date);
+  // Convert string to Date object
+const completionDate = new Date(date);
+completionDate.setUTCHours(0, 0, 0, 0); 
 
-  return { habit, isNowCompleted };
+  const isNowCompleted = await toggleCompletion(habit.id, completionDate);
+
+  return { habitId: habit.id, isNowCompleted };
 };
