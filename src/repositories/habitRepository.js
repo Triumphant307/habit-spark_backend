@@ -1,23 +1,35 @@
-// In-memory storage for habits
-const habits = [];
-
+//Using Prisma
+import { prisma } from "../prisma/client.js";
 // List all habits
-export const getAll = () => [...habits]; // return a copy to avoid direct mutation
+export const getAll = async () => {
+  return await prisma.habit.findMany({
+    include: { history: true },
+  });
+}; // return a copy to avoid direct mutation
 
 // Find habit by id
-export const getById = (id) => habits.find((h) => h.id === id);
+export const getById = async (id) => {
+  return await prisma.habit.findUnique({
+    where: { id },
+    include: { history: true },
+  });
+};
 
-// Save a new habit
-export const save = (habit) => {
-  habits.push(habit);
-  return habit;
+// Save a new habit (upserts on slug to avoid unique constraint errors)
+export const save = async (habit) => {
+  const { slug, ...rest } = habit;
+  return await prisma.habit.upsert({
+    where: { slug },
+    create: habit,
+    update: rest,
+  });
 };
 
 // Update an existing habit
-export const update = (updatedHabit) => {
-  const index = habits.findIndex((h) => h.id === updatedHabit.id);
-  if (index === -1) return null;
-
-  habits[index] = updatedHabit;
-  return updatedHabit;
+export const update = async (updatedHabit) => {
+  return await prisma.habit.update({
+    where: { id: updatedHabit.id },
+    data: updatedHabit,
+    include: { history: true },
+  });
 };

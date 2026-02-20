@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Habit {
+  id                 String       @id @default(cuid())
+  title              String
+  icon               String
+  target             Int
+  category           String
+  streak             Int          @default(0)
+  slug               String       @unique
+  startDate          DateTime
+  trackingStartDate  DateTime?
+
+  // Reminder fields
+  reminderEnabled    Boolean?     @default(false)
+  reminderTime       String?      // "HH:MM" format
+
+  // Status fields
+  isActive           Boolean?     @default(true)
+  isCompleted        Boolean?     @default(false)
+  isArchived         Boolean?     @default(false)
+
+  // Scheduling
+  frequency          Frequency?   @default(DAILY)
+  customFrequency    Json?        // { daysOfWeek?: number[], interval?: number }
+
+  // Relations
+  history            HabitEntry[]
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+}
+
+model HabitEntry {
+  id        String   @id @default(cuid())
+  date      DateTime // the completed date
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date]) // prevent duplicate entries for same day
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  CUSTOM
+}

@@ -1,21 +1,29 @@
-import { createHabit, toggleCompletion } from "./domain/habit.js";
-import { getAll, save, getById, update } from "./repositories/habitRepository.js";
+import {
+  listHabits,
+  addHabit,
+  completeHabit,
+} from "./services/habitService.js";
 
-// Create a habit using domain logic
-const habit = createHabit({
-  title: "Read 10 pages",
-  emoji: "📘",
-  category: "Learning",
-});
+const test = async () => {
+  //Add a habit
+  const habit = await addHabit({
+   title: "Eat Healthy",
+    icon: "🍎",
+    category: "Health",
+    target: 1,   
+  });
 
-// Save it in repository
-save(habit);
+  console.log("Habit added:", habit);
 
-console.log("All habits after save:", getAll());
+  const allHabitsAfterCreation = await listHabits();
+  console.log("All habits after creation:", allHabitsAfterCreation);
 
-// Complete habit for today
-const habitFromRepo = getById(habit.id);
-const updatedHabit = toggleCompletion(habitFromRepo, "2026-01-30");
-update(updatedHabit);
+  const completedHabit = await completeHabit(habit.id, new Date("2026-02-20"));
 
-console.log("All habits after completion:", getAll());
+  console.log("Completed habit:", completedHabit);
+
+  const allHabitsAfterCompletion = await listHabits();
+  console.log("All habits after completion:", allHabitsAfterCompletion);
+};
+
+test().catch((err) => console.error(err));
