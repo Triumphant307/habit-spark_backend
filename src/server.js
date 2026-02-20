@@ -25,14 +25,19 @@ app.get("/", (req, res) => {
 });
 
 //Get all habits
-app.get("/habits", (req, res) => {
-  res.json(listHabits());
+app.get("/habits", async (req, res) => {
+  try {
+    const habits = await listHabits();
+    res.json(habits);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 //Add a new habit
-app.post("/habits", (req, res) => {
+app.post("/habits", async (req, res) => {
   try {
-    const habit = addHabit(req.body);
+    const habit = await addHabit(req.body);
     res.status(201).json(habit);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -40,10 +45,10 @@ app.post("/habits", (req, res) => {
 });
 
 //Toogl habit completion
-app.patch("/habits/:id/complete", (req, res) => {
+app.patch("/habits/:id/complete", async (req, res) => {
   try {
     const { date } = req.body;
-    const habit = completeHabit(req.params.id, date);
+    const habit = await completeHabit(req.params.id, date);
     res.json(habit);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -53,4 +58,3 @@ app.patch("/habits/:id/complete", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
-
