@@ -24,10 +24,12 @@ export const completeHabit = async (id, date) => {
   if (!habit) throw new Error("Habit not found");
 
   // Convert string to Date object
-const completionDate = new Date(date);
-completionDate.setUTCHours(0, 0, 0, 0); 
+  const completionDate = new Date(date);
+  completionDate.setUTCHours(0, 0, 0, 0);
 
   const isNowCompleted = await toggleCompletion(habit.id, completionDate);
 
-  return { habitId: habit.id, isNowCompleted };
+  const updatedHabit = await habitRepository.getById(id);
+
+  return { habitId: updatedHabit, isNowCompleted };
 };
