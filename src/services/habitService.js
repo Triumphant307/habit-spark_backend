@@ -8,6 +8,13 @@ export const listHabits = async () => {
   return habits;
 };
 
+// Get a single habit by id
+export const getHabit = async (id) => {
+  const habit = await habitRepository.getById(id);
+  if (!habit) throw new Error("Habit not found");
+  return habit;
+};
+
 // Add a new habit
 export const addHabit = async (data) => {
   //use domain logic to create habit
@@ -27,11 +34,46 @@ export const completeHabit = async (id, date) => {
   const completionDate = new Date(date);
   completionDate.setUTCHours(0, 0, 0, 0);
 
-  const isNowCompleted = await toggleCompletion(habit.id, completionDate);
+  const { isNowCompleted, streak } = await toggleCompletion(
+    habit.id,
+    completionDate,
+  );
 
   const updatedHabit = await habitRepository.getById(id);
 
-  return { habit: updatedHabit, isNowCompleted };
+  return { habit: updatedHabit, isNowCompleted, streak };
+};
+
+// Update a habit's editable fields
+export const updateHabit = async (id, data) => {
+  const habit = await habitRepository.getById(id);
+  if (!habit) throw new Error("Habit not found");
+
+  // Only allow user-editable fields
+  const {
+    title,
+    icon,
+    category,
+    target,
+    reminderEnabled,
+    reminderTime,
+    frequency,
+    customFrequency,
+  } = data;
+
+  const updated = await habitRepository.update({
+    id,
+    title,
+    icon,
+    category,
+    target,
+    reminderEnabled,
+    reminderTime,
+    frequency,
+    customFrequency,
+  });
+
+  return updated;
 };
 
 // Delete a habit
