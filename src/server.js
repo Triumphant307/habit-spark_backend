@@ -1,13 +1,12 @@
+import "dotenv/config";
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import {
   addHabit,
   listHabits,
   completeHabit,
+  deleteHabit,
 } from "./services/habitService.js";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,6 +48,15 @@ app.patch("/habits/:id/complete", async (req, res) => {
   try {
     const { date } = req.body;
     const habit = await completeHabit(req.params.id, date);
+    res.json(habit);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete("/habits/:id", async (req, res) => {
+  try {
+    const habit = await deleteHabit(req.params.id);
     res.json(habit);
   } catch (error) {
     res.status(400).json({ error: error.message });

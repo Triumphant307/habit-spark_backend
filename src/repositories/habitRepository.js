@@ -33,3 +33,10 @@ export const update = async (updatedHabit) => {
     include: { history: true },
   });
 };
+
+//Delete a habit
+export const remove = async (id) => {
+  return await prisma.habit.delete({
+    where: { id },
+  });
+};

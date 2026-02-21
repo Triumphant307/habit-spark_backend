@@ -31,5 +31,15 @@ export const completeHabit = async (id, date) => {
 
   const updatedHabit = await habitRepository.getById(id);
 
-  return { habitId: updatedHabit, isNowCompleted };
+  return { habit: updatedHabit, isNowCompleted };
+};
+
+// Delete a habit
+export const deleteHabit = async (id) => {
+  const habit = await habitRepository.getById(id);
+  if (!habit) throw new Error("Habit not found");
+
+  await habitRepository.remove(id);
+
+  return { habitId: habit.id, message: "Habit deleted successfully" };
 };
