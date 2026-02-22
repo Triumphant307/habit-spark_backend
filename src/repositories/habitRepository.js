@@ -1,5 +1,5 @@
 //Using Prisma
-import { prisma } from "../prisma/client.js";
+import { prisma } from "../config/database.js";
 // List all habits
 export const getAll = async () => {
   return await prisma.habit.findMany({

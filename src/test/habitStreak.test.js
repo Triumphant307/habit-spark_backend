@@ -3,7 +3,7 @@ import {
   completeHabit,
   deleteHabit,
 } from "../services/habitService.js";
-import { prisma } from "../prisma/client.js";
+import { prisma } from "../config/database.js";
 
 describe("Habit Service Streak Logic", () => {
   let testHabitId;
@@ -48,5 +48,13 @@ describe("Habit Service Streak Logic", () => {
     expect(res3.isNowCompleted).toBe(false);
     // Streak for date2 becomes 1 when the preceding completion is removed
     expect(res3.streak).toBe(1);
+  });
+
+  describe("Negative Tests", () => {
+    test("should throw error when toggling completion for non-existent habit", async () => {
+      await expect(completeHabit("invalid-id", "2026-02-22")).rejects.toThrow(
+        "Habit not found",
+      );
+    });
   });
 });

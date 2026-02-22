@@ -1,5 +1,6 @@
 import { createHabit, toggleCompletion } from "../domain/habit.js";
 import * as habitRepository from "../repositories/habitRepository.js";
+import { AppError } from "../utils/errors.js";
 
 // List all habits
 export const listHabits = async () => {
@@ -11,7 +12,7 @@ export const listHabits = async () => {
 // Get a single habit by id
 export const getHabit = async (id) => {
   const habit = await habitRepository.getById(id);
-  if (!habit) throw new Error("Habit not found");
+  if (!habit) throw new AppError("Habit not found", 404);
   return habit;
 };
 
@@ -28,7 +29,7 @@ export const addHabit = async (data) => {
 // Mark habit as completed/uncompleted for a date
 export const completeHabit = async (id, date) => {
   const habit = await habitRepository.getById(id);
-  if (!habit) throw new Error("Habit not found");
+  if (!habit) throw new AppError("Habit not found", 404);
 
   // Convert string to Date object
   const completionDate = new Date(date);
@@ -47,7 +48,7 @@ export const completeHabit = async (id, date) => {
 // Update a habit's editable fields
 export const updateHabit = async (id, data) => {
   const habit = await habitRepository.getById(id);
-  if (!habit) throw new Error("Habit not found");
+  if (!habit) throw new AppError("Habit not found", 404);
 
   // Only allow user-editable fields
   const {
@@ -79,7 +80,7 @@ export const updateHabit = async (id, data) => {
 // Delete a habit
 export const deleteHabit = async (id) => {
   const habit = await habitRepository.getById(id);
-  if (!habit) throw new Error("Habit not found");
+  if (!habit) throw new AppError("Habit not found", 404);
 
   await habitRepository.remove(id);
 

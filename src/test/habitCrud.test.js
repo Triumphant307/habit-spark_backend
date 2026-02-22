@@ -4,7 +4,7 @@ import {
   updateHabit,
   deleteHabit,
 } from "../services/habitService.js";
-import { prisma } from "../prisma/client.js";
+import { prisma } from "../config/database.js";
 
 describe("Habit Service CRUD Operations", () => {
   let testHabitId;
@@ -53,5 +53,34 @@ describe("Habit Service CRUD Operations", () => {
     // Verify it's gone
     await expect(getHabit(testHabitId)).rejects.toThrow("Habit not found");
     testHabitId = null;
+  });
+
+  describe("Negative Tests", () => {
+    test("should throw error when title is missing", async () => {
+      const invalidData = { icon: "🍎", category: "Health" };
+      await expect(addHabit(invalidData)).rejects.toThrow(
+        "Habit title is required",
+      );
+    });
+
+    test("should throw error when category is missing", async () => {
+      const invalidData = { title: "No Category", icon: "🍎" };
+      await expect(addHabit(invalidData)).rejects.toThrow(
+        "Habit category is required",
+      );
+    });
+
+    test("should throw error when icon is missing", async () => {
+      const invalidData = { title: "No Icon", category: "Health" };
+      await expect(addHabit(invalidData)).rejects.toThrow(
+        "Habit icon is required",
+      );
+    });
+
+    test("should throw error when fetching non-existent habit", async () => {
+      await expect(getHabit("non-existent-id")).rejects.toThrow(
+        "Habit not found",
+      );
+    });
   });
 });

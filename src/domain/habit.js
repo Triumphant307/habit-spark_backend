@@ -1,4 +1,5 @@
-import { prisma } from "../prisma/client.js";
+import { prisma } from "../config/database.js";
+import { AppError } from "../utils/errors.js";
 
 const generateId = () => Math.random().toString(36).substring(2, 10);
 
@@ -9,15 +10,17 @@ export const createHabit = ({
   target,
   startDate = new Date(),
 }) => {
-  if (!title) throw new Error("Habit title is required");
+  if (!title) throw new AppError("Habit title is required", 400);
 
-  if (!category) throw new Error("Habit category is required");
+  if (!category) throw new AppError("Habit category is required", 400);
+
+  if (!icon) throw new AppError("Habit icon is required", 400);
 
   const slug = title.toLowerCase().replace(/\s+/g, "-");
 
   return {
     title,
-    icon: icon || "🔥",
+    icon,
     category,
     target: target || 1,
     slug,

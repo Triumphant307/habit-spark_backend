@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../app.js";
-import { prisma } from "../prisma/client.js";
+import { prisma } from "../config/database.js";
 
 describe("Habit API Integration Tests", () => {
   let testHabitId;
@@ -53,6 +53,59 @@ describe("Habit API Integration Tests", () => {
     test("should return 404 for non-existent habit", async () => {
       const res = await request(app).get("/habits/non-existent-id");
       expect(res.status).toBe(404);
+      expect(res.body.status).toBe("error");
+      expect(res.body.message).toBe("Habit not found");
+    });
+  });
+
+  describe("POST /habits - Validation", () => {
+    test("should return 400 if title is missing", async () => {
+      const res = await request(app)
+        .post("/habits")
+        .send({ icon: "🍎", category: "Health" });
+      expect(res.status).toBe(400);
+      expect(res.body.status).toBe("error");
+      expect(res.body.message).toBe("Habit title is required");
+    });
+
+    test("should return 400 if icon is missing", async () => {
+      const res = await request(app)
+        .post("/habits")
+        .send({ title: "No Icon", category: "Health" });
+      expect(res.status).toBe(400);
+      expect(res.body.status).toBe("error");
+      expect(res.body.message).toBe("Habit icon is required");
+    });
+
+    test("should return 400 if category is missing", async () => {
+      const res = await request(app)
+        .post("/habits")
+        .send({ title: "No Category", icon: "🍎" });
+      expect(res.status).toBe(400);
+      expect(res.body.status).toBe("error");
+      expect(res.body.message).toBe("Habit category is required");
+    });
+  });
+
+  describe("PATCH /habits/:id/complete - Negative", () => {
+    test("should return 404 for toggling non-existent habit", async () => {
+      const res = await request(app)
+        .patch("/habits/non-existent-id/complete")
+        .send({ date: "2026-02-22" });
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe("error");
+      expect(res.body.message).toBe("Habit not found");
+    });
+  });
+
+  describe("PATCH /habits/:id - Negative", () => {
+    test("should return 404 when updating non-existent habit", async () => {
+      const res = await request(app)
+        .patch("/habits/non-existent-id")
+        .send({ title: "New Title" });
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe("error");
+      expect(res.body.message).toBe("Habit not found");
     });
   });
 
