@@ -53,7 +53,7 @@ describe("Habit API Integration Tests", () => {
     test("should return 404 for non-existent habit", async () => {
       const res = await request(app).get("/habits/non-existent-id");
       expect(res.status).toBe(404);
-      expect(res.body.status).toBe("error");
+      expect(res.body.status).toBe("fail");
       expect(res.body.message).toBe("Habit not found");
     });
   });
@@ -64,7 +64,7 @@ describe("Habit API Integration Tests", () => {
         .post("/habits")
         .send({ icon: "🍎", category: "Health" });
       expect(res.status).toBe(400);
-      expect(res.body.status).toBe("error");
+      expect(res.body.status).toBe("fail");
       expect(res.body.message).toBe("Habit title is required");
     });
 
@@ -73,7 +73,7 @@ describe("Habit API Integration Tests", () => {
         .post("/habits")
         .send({ title: "No Icon", category: "Health" });
       expect(res.status).toBe(400);
-      expect(res.body.status).toBe("error");
+      expect(res.body.status).toBe("fail");
       expect(res.body.message).toBe("Habit icon is required");
     });
 
@@ -82,7 +82,7 @@ describe("Habit API Integration Tests", () => {
         .post("/habits")
         .send({ title: "No Category", icon: "🍎" });
       expect(res.status).toBe(400);
-      expect(res.body.status).toBe("error");
+      expect(res.body.status).toBe("fail");
       expect(res.body.message).toBe("Habit category is required");
     });
   });
@@ -93,7 +93,7 @@ describe("Habit API Integration Tests", () => {
         .patch("/habits/non-existent-id/complete")
         .send({ date: "2026-02-22" });
       expect(res.status).toBe(404);
-      expect(res.body.status).toBe("error");
+      expect(res.body.status).toBe("fail");
       expect(res.body.message).toBe("Habit not found");
     });
   });
@@ -104,7 +104,7 @@ describe("Habit API Integration Tests", () => {
         .patch("/habits/non-existent-id")
         .send({ title: "New Title" });
       expect(res.status).toBe(404);
-      expect(res.body.status).toBe("error");
+      expect(res.body.status).toBe("fail");
       expect(res.body.message).toBe("Habit not found");
     });
   });

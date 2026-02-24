@@ -1,7 +1,4 @@
-import { prisma } from "../config/database.js";
 import { AppError } from "../utils/errors.js";
-
-const generateId = () => Math.random().toString(36).substring(2, 10);
 
 export const createHabit = ({
   title,
@@ -11,9 +8,7 @@ export const createHabit = ({
   startDate = new Date(),
 }) => {
   if (!title) throw new AppError("Habit title is required", 400);
-
   if (!category) throw new AppError("Habit category is required", 400);
-
   if (!icon) throw new AppError("Habit icon is required", 400);
 
   const slug = title.toLowerCase().replace(/\s+/g, "-");
@@ -28,56 +23,40 @@ export const createHabit = ({
   };
 };
 
-export const toggleCompletion = async (habitId, date) => {
-  const existing = await prisma.habitEntry.findUnique({
-    where: { habitId_date: { habitId, date } },
-  });
-
-  if (existing) {
-    // Remove the completion
-    await prisma.habitEntry.delete({ where: { id: existing.id } });
-  } else {
-    // Add the completion
-    await prisma.habitEntry.create({ data: { habitId, date } });
-  }
-
-  // --- Recalculate streak ---
-  const entries = await prisma.habitEntry.findMany({
-    where: { habitId },
-    orderBy: { date: "desc" },
-  });
-
+/**
+ * Pure streak calculation — no I/O, no side effects.
+ * @param {Date[]} entries - All completion dates for the habit, sorted descending.
+ * @param {Date}   referenceDate - The date of the toggle action (UTC midnight).
+ * @returns {number} The current streak length.
+ */
+export const calculateStreak = (entries, referenceDate) => {
   let streak = 0;
   let prevDate = null;
 
-  const today = new Date(date);
-  today.setHours(0, 0, 0, 0);
-
   for (const entry of entries) {
-    const entryDate = new Date(entry.date);
+    const entryDate = new Date(entry);
     entryDate.setHours(0, 0, 0, 0);
 
     if (prevDate === null) {
-      // First iteration
-      if ((today - entryDate) / (1000 * 60 * 60 * 24) <= 1) {
+      // First entry must be today or yesterday relative to the reference date
+      const diffDays = (referenceDate - entryDate) / (1000 * 60 * 60 * 24);
+      if (diffDays <= 1) {
         streak = 1;
         prevDate = entryDate;
-      } else break;
+      } else {
+        break;
+      }
     } else {
-      // Check if previous date - current date = 1 day
+      // Each subsequent entry must be exactly one day before the previous
       const diffDays = (prevDate - entryDate) / (1000 * 60 * 60 * 24);
       if (diffDays === 1) {
         streak++;
         prevDate = entryDate;
-      } else break;
+      } else {
+        break;
+      }
     }
   }
 
-  // Update habit streak
-  await prisma.habit.update({
-    where: { id: habitId },
-    data: { streak },
-  });
-
-  return { isNowCompleted: !existing, streak };
+  return streak;
 };

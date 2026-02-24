@@ -1,12 +1,10 @@
-import { createHabit, toggleCompletion } from "../domain/habit.js";
+import { createHabit, calculateStreak } from "../domain/habit.js";
 import * as habitRepository from "../repositories/habitRepository.js";
 import { AppError } from "../utils/errors.js";
 
 // List all habits
 export const listHabits = async () => {
-  //fetch habits from the database
-  const habits = await habitRepository.getAll();
-  return habits;
+  return await habitRepository.getAll();
 };
 
 // Get a single habit by id
@@ -18,31 +16,40 @@ export const getHabit = async (id) => {
 
 // Add a new habit
 export const addHabit = async (data) => {
-  //use domain logic to create habit
+  // Domain validates fields and builds the habit object
   const habit = createHabit(data);
-
-  //save to DB
-  const savedHabit = await habitRepository.save(habit);
-  return savedHabit;
+  return await habitRepository.save(habit);
 };
 
-// Mark habit as completed/uncompleted for a date
+// Mark habit as completed / uncompleted for a given date
 export const completeHabit = async (id, date) => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError("Habit not found", 404);
 
-  // Convert string to Date object
+  // Normalise to UTC midnight so the DB unique constraint matches consistently
   const completionDate = new Date(date);
   completionDate.setUTCHours(0, 0, 0, 0);
 
-  const { isNowCompleted, streak } = await toggleCompletion(
-    habit.id,
-    completionDate,
-  );
+  // Toggle: remove if already completed, add if not
+  const existing = await habitRepository.findEntry(id, completionDate);
+  if (existing) {
+    await habitRepository.removeEntry(existing.id);
+  } else {
+    await habitRepository.addEntry(id, completionDate);
+  }
+
+  // Recalculate streak using pure domain logic
+  const entries = await habitRepository.getEntries(id);
+  const entryDates = entries.map((e) => e.date); // already Date objects from Prisma
+
+  const referenceDate = new Date(date);
+  referenceDate.setHours(0, 0, 0, 0);
+
+  const streak = calculateStreak(entryDates, referenceDate);
+  await habitRepository.updateStreak(id, streak);
 
   const updatedHabit = await habitRepository.getById(id);
-
-  return { habit: updatedHabit, isNowCompleted, streak };
+  return { habit: updatedHabit, isNowCompleted: !existing, streak };
 };
 
 // Update a habit's editable fields
@@ -50,7 +57,7 @@ export const updateHabit = async (id, data) => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError("Habit not found", 404);
 
-  // Only allow user-editable fields
+  // Only pass user-editable fields to the repository
   const {
     title,
     icon,
@@ -62,7 +69,7 @@ export const updateHabit = async (id, data) => {
     customFrequency,
   } = data;
 
-  const updated = await habitRepository.update({
+  return await habitRepository.update({
     id,
     title,
     icon,
@@ -73,8 +80,6 @@ export const updateHabit = async (id, data) => {
     frequency,
     customFrequency,
   });
-
-  return updated;
 };
 
 // Delete a habit
@@ -83,6 +88,5 @@ export const deleteHabit = async (id) => {
   if (!habit) throw new AppError("Habit not found", 404);
 
   await habitRepository.remove(id);
-
   return { habitId: habit.id, message: "Habit deleted successfully" };
 };
