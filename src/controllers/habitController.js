@@ -62,7 +62,7 @@ export const updateHabitDetails = async (req, res, next) => {
 export const deleteHabitById = async (req, res, next) => {
   try {
     const result = await deleteHabit(req.params.id);
-    res.json(result);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
