@@ -57,29 +57,29 @@ export const updateHabit = async (id, data) => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError("Habit not found", 404);
 
-  // Only pass user-editable fields to the repository
-  const {
-    title,
-    icon,
-    category,
-    target,
-    reminderEnabled,
-    reminderTime,
-    frequency,
-    customFrequency,
-  } = data;
+  // Define which fields a client is permitted to update
+  const allowedFields = [
+    "title",
+    "icon",
+    "category",
+    "target",
+    "reminderEnabled",
+    "reminderTime",
+    "frequency",
+    "customFrequency",
+  ];
 
-  return await habitRepository.update({
-    id,
-    title,
-    icon,
-    category,
-    target,
-    reminderEnabled,
-    reminderTime,
-    frequency,
-    customFrequency,
-  });
+  // Build the update payload with only fields that were explicitly provided.
+  // This prevents undefined values from reaching Prisma, making the intent
+  // explicit rather than relying on Prisma's implicit undefined-ignoring behaviour.
+  const payload = allowedFields.reduce((acc, field) => {
+    if (data[field] !== undefined) {
+      acc[field] = data[field];
+    }
+    return acc;
+  }, {});
+
+  return await habitRepository.update({ id, ...payload });
 };
 
 // Delete a habit
