@@ -5,7 +5,7 @@ export const errorHandler = (err, req, res, next) => {
   const message = err.message || "Internal Server Error";
 
   res.status(statusCode).json({
-    status: err.status || (statusCode >= 500 ? "fail" : "error"),
+    status: err.status || (statusCode >= 500 ? "error" : "fail"),
     statusCode,
     message,
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
