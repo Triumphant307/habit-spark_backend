@@ -8,7 +8,8 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
+  // In Prisma 7, the connection URL moves here from schema.prisma
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: process.env["DATABASE_URL"]!,
   },
 });
