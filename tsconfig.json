@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    /* Target ES2022 to support async/await, top-level await, and modern JS natively */
+    "target": "ES2022",
+
+    /* NodeNext = proper ESM support for Node.js — honours .js extensions in imports */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* Strict enables: noImplicitAny, strictNullChecks, strictFunctionTypes, etc. */
+    "strict": true,
+
+    /* Compiled output goes to dist/ — not used at runtime since tsx runs src/ directly */
+    "outDir": "dist",
+    "rootDir": "src",
+
+    /* Allows default imports from CommonJS modules like express */
+    "esModuleInterop": true,
+
+    /* Skips type checking of node_modules — keeps compilation fast */
+    "skipLibCheck": true,
+
+    /* Catches casing bugs that only surface on case-sensitive filesystems (Linux/CI) */
+    "forceConsistentCasingInFileNames": true,
+
+    /* Required by ts-jest when using NodeNext module resolution */
+    "isolatedModules": true,
+
+    /* Decorators — not used yet but required if Prisma decorators are ever needed */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

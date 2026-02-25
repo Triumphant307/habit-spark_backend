@@ -6,7 +6,8 @@ import {
 import { prisma } from "../config/database.js";
 
 describe("Habit Service Streak Logic", () => {
-  let testHabitId;
+  // Definite assignment — populated in beforeAll before any test uses it
+  let testHabitId!: string;
 
   beforeAll(async () => {
     const habit = await addHabit({

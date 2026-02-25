@@ -8,7 +8,8 @@ import { createHabitSchema } from "../validators/habitValidators.js";
 import { prisma } from "../config/database.js";
 
 describe("Habit Service CRUD Operations", () => {
-  let testHabitId;
+  // Definite assignment — populated in the first test before any usage
+  let testHabitId!: string;
   const habitData = {
     title: "CRUD Test Habit",
     icon: "🧪",
@@ -53,7 +54,7 @@ describe("Habit Service CRUD Operations", () => {
 
     // Verify it's gone
     await expect(getHabit(testHabitId)).rejects.toThrow("Habit not found");
-    testHabitId = null;
+    testHabitId = ""; // empty string is falsy — afterAll guard skips re-deletion
   });
 
   test("should throw error when fetching non-existent habit", async () => {
@@ -71,7 +72,7 @@ describe("Habit Service CRUD Operations", () => {
         category: "Health",
       });
       expect(result.success).toBe(false);
-      const fields = result.error.issues.map((e) => e.path[0]);
+      const fields = result.error!.issues.map((e) => e.path[0]);
       expect(fields).toContain("title");
     });
 
@@ -81,7 +82,7 @@ describe("Habit Service CRUD Operations", () => {
         category: "Health",
       });
       expect(result.success).toBe(false);
-      const fields = result.error.issues.map((e) => e.path[0]);
+      const fields = result.error!.issues.map((e) => e.path[0]);
       expect(fields).toContain("icon");
     });
 
@@ -91,7 +92,7 @@ describe("Habit Service CRUD Operations", () => {
         icon: "🍎",
       });
       expect(result.success).toBe(false);
-      const fields = result.error.issues.map((e) => e.path[0]);
+      const fields = result.error!.issues.map((e) => e.path[0]);
       expect(fields).toContain("category");
     });
 
@@ -103,7 +104,7 @@ describe("Habit Service CRUD Operations", () => {
         target: -5,
       });
       expect(result.success).toBe(false);
-      const fields = result.error.issues.map((e) => e.path[0]);
+      const fields = result.error!.issues.map((e) => e.path[0]);
       expect(fields).toContain("target");
     });
 
@@ -115,7 +116,7 @@ describe("Habit Service CRUD Operations", () => {
         reminderTime: "9am",
       });
       expect(result.success).toBe(false);
-      const fields = result.error.issues.map((e) => e.path[0]);
+      const fields = result.error!.issues.map((e) => e.path[0]);
       expect(fields).toContain("reminderTime");
     });
 

@@ -1,28 +1,49 @@
+import { Habit } from "@prisma/client";
 import { createHabit, calculateStreak } from "../domain/habit.js";
 import * as habitRepository from "../repositories/habitRepository.js";
+import { HabitWithHistory } from "../repositories/habitRepository.js";
 import { AppError } from "../utils/errors.js";
 
-// List all habits
-export const listHabits = async () => {
+// Input type for updateHabit — all fields are optional since PATCH is partial
+interface UpdateHabitData {
+  title?: string;
+  icon?: string;
+  category?: string;
+  target?: number;
+  reminderEnabled?: boolean;
+  reminderTime?: string;
+  frequency?: string;
+  customFrequency?: Record<string, unknown>;
+  [key: string]: unknown; // allows bracket-notation access in the reduce
+}
+
+// ── Service functions ────────────────────────────────────────────────────────
+
+export const listHabits = async (): Promise<HabitWithHistory[]> => {
   return await habitRepository.getAll();
 };
 
-// Get a single habit by id
-export const getHabit = async (id) => {
+export const getHabit = async (id: string): Promise<HabitWithHistory> => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError("Habit not found", 404);
   return habit;
 };
 
-// Add a new habit
-export const addHabit = async (data) => {
-  // Domain validates fields and builds the habit object
+export const addHabit = async (
+  data: Parameters<typeof createHabit>[0],
+): Promise<Habit> => {
   const habit = createHabit(data);
   return await habitRepository.save(habit);
 };
 
-// Mark habit as completed / uncompleted for a given date
-export const completeHabit = async (id, date) => {
+export const completeHabit = async (
+  id: string,
+  date: string,
+): Promise<{
+  habit: HabitWithHistory;
+  isNowCompleted: boolean;
+  streak: number;
+}> => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError("Habit not found", 404);
 
@@ -50,13 +71,14 @@ export const completeHabit = async (id, date) => {
   return { habit: updatedHabit, isNowCompleted: !existing, streak };
 };
 
-// Update a habit's editable fields
-export const updateHabit = async (id, data) => {
+export const updateHabit = async (
+  id: string,
+  data: UpdateHabitData,
+): Promise<HabitWithHistory> => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError("Habit not found", 404);
 
-  // Define which fields a client is permitted to update
-  const allowedFields = [
+  const allowedFields: (keyof UpdateHabitData)[] = [
     "title",
     "icon",
     "category",
@@ -67,21 +89,23 @@ export const updateHabit = async (id, data) => {
     "customFrequency",
   ];
 
-  // Build the update payload with only fields that were explicitly provided.
-  // This prevents undefined values from reaching Prisma, making the intent
-  // explicit rather than relying on Prisma's implicit undefined-ignoring behaviour.
-  const payload = allowedFields.reduce((acc, field) => {
-    if (data[field] !== undefined) {
-      acc[field] = data[field];
-    }
-    return acc;
-  }, {});
+  // Build payload from only provided fields — avoid sending undefined to Prisma
+  const payload = allowedFields.reduce<Record<string, unknown>>(
+    (acc, field) => {
+      if (data[field] !== undefined) {
+        acc[field as string] = data[field];
+      }
+      return acc;
+    },
+    {},
+  );
 
   return await habitRepository.update({ id, ...payload });
 };
 
-// Delete a habit
-export const deleteHabit = async (id) => {
+export const deleteHabit = async (
+  id: string,
+): Promise<{ habitId: string; message: string }> => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError("Habit not found", 404);
 
