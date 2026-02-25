@@ -1,5 +1,3 @@
-import { AppError } from "../utils/errors.js";
-
 export const createHabit = ({
   title,
   icon,
@@ -7,10 +5,6 @@ export const createHabit = ({
   target,
   startDate = new Date(),
 }) => {
-  if (!title) throw new AppError("Habit title is required", 400);
-  if (!category) throw new AppError("Habit category is required", 400);
-  if (!icon) throw new AppError("Habit icon is required", 400);
-
   const slug = title.toLowerCase().replace(/\s+/g, "-");
 
   return {

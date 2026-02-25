@@ -65,7 +65,7 @@ describe("Habit API Integration Tests", () => {
         .send({ icon: "🍎", category: "Health" });
       expect(res.status).toBe(400);
       expect(res.body.status).toBe("fail");
-      expect(res.body.message).toBe("Habit title is required");
+      expect(res.body.message).toContain("title");
     });
 
     test("should return 400 if icon is missing", async () => {
@@ -74,7 +74,7 @@ describe("Habit API Integration Tests", () => {
         .send({ title: "No Icon", category: "Health" });
       expect(res.status).toBe(400);
       expect(res.body.status).toBe("fail");
-      expect(res.body.message).toBe("Habit icon is required");
+      expect(res.body.message).toContain("icon");
     });
 
     test("should return 400 if category is missing", async () => {
@@ -83,7 +83,7 @@ describe("Habit API Integration Tests", () => {
         .send({ title: "No Category", icon: "🍎" });
       expect(res.status).toBe(400);
       expect(res.body.status).toBe("fail");
-      expect(res.body.message).toBe("Habit category is required");
+      expect(res.body.message).toContain("category");
     });
   });
 

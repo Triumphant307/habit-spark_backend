@@ -4,6 +4,7 @@ import {
   updateHabit,
   deleteHabit,
 } from "../services/habitService.js";
+import { createHabitSchema } from "../validators/habitValidators.js";
 import { prisma } from "../config/database.js";
 
 describe("Habit Service CRUD Operations", () => {
@@ -55,32 +56,76 @@ describe("Habit Service CRUD Operations", () => {
     testHabitId = null;
   });
 
-  describe("Negative Tests", () => {
-    test("should throw error when title is missing", async () => {
-      const invalidData = { icon: "🍎", category: "Health" };
-      await expect(addHabit(invalidData)).rejects.toThrow(
-        "Habit title is required",
-      );
+  test("should throw error when fetching non-existent habit", async () => {
+    await expect(getHabit("non-existent-id")).rejects.toThrow(
+      "Habit not found",
+    );
+  });
+
+  // Validation is now handled by Zod at the route boundary, not by the domain.
+  // These tests verify the schema directly — no DB or service calls needed.
+  describe("Zod Schema Validation — createHabitSchema", () => {
+    test("should fail validation when title is missing", () => {
+      const result = createHabitSchema.safeParse({
+        icon: "🍎",
+        category: "Health",
+      });
+      expect(result.success).toBe(false);
+      const fields = result.error.issues.map((e) => e.path[0]);
+      expect(fields).toContain("title");
     });
 
-    test("should throw error when category is missing", async () => {
-      const invalidData = { title: "No Category", icon: "🍎" };
-      await expect(addHabit(invalidData)).rejects.toThrow(
-        "Habit category is required",
-      );
+    test("should fail validation when icon is missing", () => {
+      const result = createHabitSchema.safeParse({
+        title: "No Icon",
+        category: "Health",
+      });
+      expect(result.success).toBe(false);
+      const fields = result.error.issues.map((e) => e.path[0]);
+      expect(fields).toContain("icon");
     });
 
-    test("should throw error when icon is missing", async () => {
-      const invalidData = { title: "No Icon", category: "Health" };
-      await expect(addHabit(invalidData)).rejects.toThrow(
-        "Habit icon is required",
-      );
+    test("should fail validation when category is missing", () => {
+      const result = createHabitSchema.safeParse({
+        title: "No Category",
+        icon: "🍎",
+      });
+      expect(result.success).toBe(false);
+      const fields = result.error.issues.map((e) => e.path[0]);
+      expect(fields).toContain("category");
     });
 
-    test("should throw error when fetching non-existent habit", async () => {
-      await expect(getHabit("non-existent-id")).rejects.toThrow(
-        "Habit not found",
-      );
+    test("should fail validation when target is not a positive integer", () => {
+      const result = createHabitSchema.safeParse({
+        title: "Test",
+        icon: "🍎",
+        category: "Health",
+        target: -5,
+      });
+      expect(result.success).toBe(false);
+      const fields = result.error.issues.map((e) => e.path[0]);
+      expect(fields).toContain("target");
+    });
+
+    test("should fail validation when reminderTime format is invalid", () => {
+      const result = createHabitSchema.safeParse({
+        title: "Test",
+        icon: "🍎",
+        category: "Health",
+        reminderTime: "9am",
+      });
+      expect(result.success).toBe(false);
+      const fields = result.error.issues.map((e) => e.path[0]);
+      expect(fields).toContain("reminderTime");
+    });
+
+    test("should pass validation with all required fields", () => {
+      const result = createHabitSchema.safeParse({
+        title: "Morning Run",
+        icon: "🏃",
+        category: "Fitness",
+      });
+      expect(result.success).toBe(true);
     });
   });
 });

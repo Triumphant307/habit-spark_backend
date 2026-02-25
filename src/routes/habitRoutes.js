@@ -7,6 +7,12 @@ import {
   updateHabitDetails,
   deleteHabitById,
 } from "../controllers/habitController.js";
+import { validate } from "../middleware/validate.js";
+import {
+  createHabitSchema,
+  updateHabitSchema,
+  completeHabitSchema,
+} from "../validators/habitValidators.js";
 
 const router = Router();
 
@@ -17,13 +23,17 @@ router.get("/", getAllHabits);
 router.get("/:id", getHabitById);
 
 // Add a new habit
-router.post("/", createNewHabit);
+router.post("/", validate(createHabitSchema), createNewHabit);
 
 // Toggle habit completion for a date
-router.patch("/:id/complete", toggleHabitCompletion);
+router.patch(
+  "/:id/complete",
+  validate(completeHabitSchema),
+  toggleHabitCompletion,
+);
 
 // Update a habit's details
-router.patch("/:id", updateHabitDetails);
+router.patch("/:id", validate(updateHabitSchema), updateHabitDetails);
 
 // Delete a habit
 router.delete("/:id", deleteHabitById);
