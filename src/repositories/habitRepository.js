@@ -43,6 +43,7 @@ export const updateStreak = async (habitId, streak) => {
   return await prisma.habit.update({
     where: { id: habitId },
     data: { streak },
+    include: { history: true },
   });
 };
 

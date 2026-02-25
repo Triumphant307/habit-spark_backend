@@ -46,9 +46,7 @@ export const completeHabit = async (id, date) => {
   referenceDate.setHours(0, 0, 0, 0);
 
   const streak = calculateStreak(entryDates, referenceDate);
-  await habitRepository.updateStreak(id, streak);
-
-  const updatedHabit = await habitRepository.getById(id);
+  const updatedHabit = await habitRepository.updateStreak(id, streak);
   return { habit: updatedHabit, isNowCompleted: !existing, streak };
 };
 
