@@ -5,7 +5,7 @@ import { calculateStreak } from "../domain/habit.js";
  * Using UTC avoids daylight-saving-time edge cases where a "day" is not
  * exactly 86,400,000ms, which would cause off-by-one failures.
  */
-const daysAgo = (base, n) => {
+const daysAgo = (base: Date, n: number): Date => {
   const d = new Date(base);
   d.setUTCHours(0, 0, 0, 0);
   d.setUTCDate(d.getUTCDate() - n);

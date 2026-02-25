@@ -3,7 +3,8 @@ import app from "../app.js";
 import { prisma } from "../config/database.js";
 
 describe("Habit API Integration Tests", () => {
-  let testHabitId;
+  // Definite assignment — populated in the create test before any usage
+  let testHabitId!: string;
 
   afterAll(async () => {
     // Cleanup any habits created during tests
@@ -142,7 +143,7 @@ describe("Habit API Integration Tests", () => {
       // Verify deletion
       const checkRes = await request(app).get(`/habits/${testHabitId}`);
       expect(checkRes.status).toBe(404);
-      testHabitId = null;
+      testHabitId = ""; // empty string is falsy — afterAll guard skips re-deletion
     });
   });
 });

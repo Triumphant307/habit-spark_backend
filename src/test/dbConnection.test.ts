@@ -7,7 +7,9 @@ describe("Database Heartbeat", () => {
 
   test("should connect to the database and perform a simple check", async () => {
     // Attempt a raw query to verify the connection is alive
-    const result = await prisma.$queryRaw`SELECT 1 as connected`;
+    const result = (await prisma.$queryRaw`SELECT 1 as connected`) as Array<{
+      connected: number;
+    }>;
     expect(result[0].connected).toBe(1);
   });
 

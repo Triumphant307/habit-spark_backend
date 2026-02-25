@@ -100,7 +100,7 @@ export const updateHabit = async (
     {},
   );
 
-  return await habitRepository.update({ id, ...payload });
+  return await habitRepository.update(id, payload);
 };
 
 export const deleteHabit = async (

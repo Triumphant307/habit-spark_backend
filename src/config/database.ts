@@ -1,8 +1,6 @@
 import "dotenv/config";
-import pkg from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-
-const { PrismaClient } = pkg;
 
 // Fail fast at startup if DATABASE_URL is not configured
 if (!process.env.DATABASE_URL) {

@@ -1,22 +1,9 @@
-import { Habit, HabitEntry } from "@prisma/client";
+import type { Habit, HabitEntry, Prisma } from "@prisma/client";
 import { prisma } from "../config/database.js";
 import { HabitData } from "../domain/habit.js";
 
 // Convenience type used across layers — Habit with its completion history
 export type HabitWithHistory = Habit & { history: HabitEntry[] };
-
-// Shape of the update payload: always includes id, plus any editable fields
-export interface UpdateHabitPayload {
-  id: string;
-  title?: string;
-  icon?: string;
-  category?: string;
-  target?: number;
-  frequency?: string;
-  customFrequency?: Record<string, unknown>;
-  reminderEnabled?: boolean;
-  reminderTime?: string;
-}
 
 // ── Habit queries ────────────────────────────────────────────────────────────
 
@@ -43,13 +30,15 @@ export const save = async (habit: HabitData): Promise<Habit> => {
   });
 };
 
+// Accepts pre-filtered payload from service. Cast to HabitUpdateInput since
+// the service already validates field types via Zod before calling this.
 export const update = async (
-  updatedHabit: UpdateHabitPayload,
+  id: string,
+  data: Record<string, unknown>,
 ): Promise<HabitWithHistory> => {
-  const { id, ...data } = updatedHabit;
   return await prisma.habit.update({
     where: { id },
-    data,
+    data: data as Prisma.HabitUpdateInput,
     include: { history: true },
   });
 };

@@ -16,7 +16,8 @@ export const createHabitSchema = z.object({
     .optional(),
   startDate: z.string().datetime({ offset: true }).optional(),
   frequency: FrequencyEnum.optional(),
-  customFrequency: z.record(z.unknown()).optional(),
+  // Zod v4: z.record() requires two args — key schema + value schema
+  customFrequency: z.record(z.string(), z.unknown()).optional(),
   reminderEnabled: z.boolean().optional(),
   reminderTime: z
     .string()
@@ -25,7 +26,7 @@ export const createHabitSchema = z.object({
 });
 
 // ── Update ───────────────────────────────────────────────────────────────────
-// All fields are optional — only the sent fields are updated.
+// All fields are optional — only the sent fields are updated (PATCH semantics).
 
 export const updateHabitSchema = z.object({
   title: z.string().min(1, "Title cannot be empty").optional(),
@@ -37,7 +38,7 @@ export const updateHabitSchema = z.object({
     .positive("Target must be a positive integer")
     .optional(),
   frequency: FrequencyEnum.optional(),
-  customFrequency: z.record(z.unknown()).optional(),
+  customFrequency: z.record(z.string(), z.unknown()).optional(),
   reminderEnabled: z.boolean().optional(),
   reminderTime: z
     .string()
@@ -48,7 +49,8 @@ export const updateHabitSchema = z.object({
 // ── Toggle completion ─────────────────────────────────────────────────────────
 
 export const completeHabitSchema = z.object({
+  // Using regex instead of .date() to avoid Zod v4 overload signature changes
   date: z
-    .string({ required_error: "Date is required" })
-    .date("Date must be a valid date in YYYY-MM-DD format"),
+    .string({ error: "Date is required" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
 });

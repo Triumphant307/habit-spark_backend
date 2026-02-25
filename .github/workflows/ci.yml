@@ -44,6 +44,9 @@ jobs:
       - name: Install dependencies
         run: npm ci # clean install from package-lock.json — reproducible
 
+      - name: Generate Prisma client
+        run: npx prisma generate # generates typed client and model types used by tsc
+
       - name: Type check
         run: npx tsc --noEmit # catches TS errors without writing any output files
 
