@@ -43,7 +43,7 @@ export const completeHabit = async (id, date) => {
   const entryDates = entries.map((e) => e.date); // already Date objects from Prisma
 
   const referenceDate = new Date(date);
-  referenceDate.setHours(0, 0, 0, 0);
+  referenceDate.setUTCHours(0, 0, 0, 0);
 
   const streak = calculateStreak(entryDates, referenceDate);
   const updatedHabit = await habitRepository.updateStreak(id, streak);

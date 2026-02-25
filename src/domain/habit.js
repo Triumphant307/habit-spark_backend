@@ -35,7 +35,7 @@ export const calculateStreak = (entries, referenceDate) => {
 
   for (const entry of entries) {
     const entryDate = new Date(entry);
-    entryDate.setHours(0, 0, 0, 0);
+    entryDate.setUTCHours(0, 0, 0, 0); // UTC — Prisma stores dates in UTC
 
     if (prevDate === null) {
       // First entry must be today or yesterday relative to the reference date
