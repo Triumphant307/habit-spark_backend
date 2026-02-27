@@ -37,6 +37,5 @@ build/
 /src/generated/prisma
 
 # Agent and Platform specific
-.agent/
 .gemini/
 .turbo/
