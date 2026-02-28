@@ -3,6 +3,7 @@ interface CreateHabitInput {
   title: string;
   icon: string;
   category: string;
+  userId: string;
   target?: number;
   startDate?: Date;
 }
@@ -15,16 +16,18 @@ export interface HabitData {
   target: number;
   slug: string;
   startDate: Date;
+  userId: string;
 }
 
 export const createHabit = ({
   title,
   icon,
   category,
+  userId,
   target,
   startDate = new Date(),
 }: CreateHabitInput): HabitData => {
-  const slug = title.toLowerCase().replace(/\s+/g, "-");
+  const slug = title.toLowerCase().replace(/\s+/g, '-');
 
   return {
     title,
@@ -33,6 +36,7 @@ export const createHabit = ({
     target: target ?? 1,
     slug,
     startDate,
+    userId,
   };
 };
 

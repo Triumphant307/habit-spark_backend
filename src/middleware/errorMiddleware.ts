@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 
 // Extend the base Error type to include our custom fields from AppError
 interface HttpError extends Error {
@@ -17,13 +17,13 @@ export const errorHandler = (
   console.error(`[Error] ${err.stack}`);
 
   const statusCode = err.statusCode ?? 500;
-  const message = err.message ?? "Internal Server Error";
+  const message = err.message ?? 'Internal Server Error';
 
   res.status(statusCode).json({
-    status: err.status ?? (statusCode >= 500 ? "error" : "fail"),
+    status: err.status ?? (statusCode >= 500 ? 'error' : 'fail'),
     statusCode,
     message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
 

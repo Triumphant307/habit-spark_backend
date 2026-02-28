@@ -1,8 +1,8 @@
-import { Habit } from "@prisma/client";
-import { createHabit, calculateStreak } from "../domain/habit.js";
-import * as habitRepository from "../repositories/habitRepository.js";
-import { HabitWithHistory } from "../repositories/habitRepository.js";
-import { AppError } from "../utils/errors.js";
+import { Habit } from '@prisma/client';
+import { createHabit, calculateStreak } from '../domain/habit.js';
+import * as habitRepository from '../repositories/habitRepository.js';
+import { HabitWithHistory } from '../repositories/habitRepository.js';
+import { AppError } from '../utils/errors.js';
 
 // Input type for updateHabit — all fields are optional since PATCH is partial
 interface UpdateHabitData {
@@ -19,13 +19,15 @@ interface UpdateHabitData {
 
 // ── Service functions ────────────────────────────────────────────────────────
 
-export const listHabits = async (): Promise<HabitWithHistory[]> => {
-  return await habitRepository.getAll();
+export const listHabits = async (
+  userId: string,
+): Promise<HabitWithHistory[]> => {
+  return await habitRepository.getAll(userId);
 };
 
 export const getHabit = async (id: string): Promise<HabitWithHistory> => {
   const habit = await habitRepository.getById(id);
-  if (!habit) throw new AppError("Habit not found", 404);
+  if (!habit) throw new AppError('Habit not found', 404);
   return habit;
 };
 
@@ -45,7 +47,7 @@ export const completeHabit = async (
   streak: number;
 }> => {
   const habit = await habitRepository.getById(id);
-  if (!habit) throw new AppError("Habit not found", 404);
+  if (!habit) throw new AppError('Habit not found', 404);
 
   // Normalise to UTC midnight so the DB unique constraint matches consistently
   const completionDate = new Date(date);
@@ -76,17 +78,17 @@ export const updateHabit = async (
   data: UpdateHabitData,
 ): Promise<HabitWithHistory> => {
   const habit = await habitRepository.getById(id);
-  if (!habit) throw new AppError("Habit not found", 404);
+  if (!habit) throw new AppError('Habit not found', 404);
 
   const allowedFields: (keyof UpdateHabitData)[] = [
-    "title",
-    "icon",
-    "category",
-    "target",
-    "reminderEnabled",
-    "reminderTime",
-    "frequency",
-    "customFrequency",
+    'title',
+    'icon',
+    'category',
+    'target',
+    'reminderEnabled',
+    'reminderTime',
+    'frequency',
+    'customFrequency',
   ];
 
   // Build payload from only provided fields — avoid sending undefined to Prisma
@@ -107,8 +109,8 @@ export const deleteHabit = async (
   id: string,
 ): Promise<{ habitId: string; message: string }> => {
   const habit = await habitRepository.getById(id);
-  if (!habit) throw new AppError("Habit not found", 404);
+  if (!habit) throw new AppError('Habit not found', 404);
 
   await habitRepository.remove(id);
-  return { habitId: habit.id, message: "Habit deleted successfully" };
+  return { habitId: habit.id, message: 'Habit deleted successfully' };
 };
