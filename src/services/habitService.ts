@@ -25,9 +25,13 @@ export const listHabits = async (
   return await habitRepository.getAll(userId);
 };
 
-export const getHabit = async (id: string): Promise<HabitWithHistory> => {
+export const getHabit = async (
+  id: string,
+  userId: string,
+): Promise<HabitWithHistory> => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError('Habit not found', 404);
+  if (habit.userId !== userId) throw new AppError('Forbidden', 403);
   return habit;
 };
 
@@ -41,6 +45,7 @@ export const addHabit = async (
 export const completeHabit = async (
   id: string,
   date: string,
+  userId: string,
 ): Promise<{
   habit: HabitWithHistory;
   isNowCompleted: boolean;
@@ -48,6 +53,7 @@ export const completeHabit = async (
 }> => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError('Habit not found', 404);
+  if (habit.userId !== userId) throw new AppError('Forbidden', 403);
 
   // Normalise to UTC midnight so the DB unique constraint matches consistently
   const completionDate = new Date(date);
@@ -76,9 +82,11 @@ export const completeHabit = async (
 export const updateHabit = async (
   id: string,
   data: UpdateHabitData,
+  userId: string,
 ): Promise<HabitWithHistory> => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError('Habit not found', 404);
+  if (habit.userId !== userId) throw new AppError('Forbidden', 403);
 
   const allowedFields: (keyof UpdateHabitData)[] = [
     'title',
@@ -107,9 +115,11 @@ export const updateHabit = async (
 
 export const deleteHabit = async (
   id: string,
+  userId: string,
 ): Promise<{ habitId: string; message: string }> => {
   const habit = await habitRepository.getById(id);
   if (!habit) throw new AppError('Habit not found', 404);
+  if (habit.userId !== userId) throw new AppError('Forbidden', 403);
 
   await habitRepository.remove(id);
   return { habitId: habit.id, message: 'Habit deleted successfully' };

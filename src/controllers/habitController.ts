@@ -34,13 +34,7 @@ export const getAllHabits: AsyncHandler = async (req, res, next) => {
 export const getHabitById: AsyncHandler = async (req, res, next) => {
   try {
     const userId = req.userId as string;
-    const habit = await getHabit(param(req, 'id'));
-
-    // Check ownership if not already handled by service/repository
-    if (habit.userId !== userId) {
-      res.status(403).json({ status: 'fail', message: 'Unauthorized' });
-      return;
-    }
+    const habit = await getHabit(param(req, 'id'), userId);
 
     res.json(habit);
   } catch (error) {
@@ -66,14 +60,7 @@ export const toggleHabitCompletion: AsyncHandler = async (req, res, next) => {
     const habitId = param(req, 'id');
     const { date } = req.body as { date: string };
 
-    // Ownership check
-    const habit = await getHabit(habitId);
-    if (habit.userId !== userId) {
-      res.status(403).json({ status: 'fail', message: 'Unauthorized' });
-      return;
-    }
-
-    const result = await completeHabit(habitId, date);
+    const result = await completeHabit(habitId, date, userId);
     res.json(result);
   } catch (error) {
     next(error);
@@ -86,14 +73,7 @@ export const updateHabitDetails: AsyncHandler = async (req, res, next) => {
     const userId = req.userId as string;
     const habitId = param(req, 'id');
 
-    // Ownership check
-    const habit = await getHabit(habitId);
-    if (habit.userId !== userId) {
-      res.status(403).json({ status: 'fail', message: 'Unauthorized' });
-      return;
-    }
-
-    const updated = await updateHabit(habitId, req.body);
+    const updated = await updateHabit(habitId, req.body, userId);
     res.json(updated);
   } catch (error) {
     next(error);
@@ -106,14 +86,7 @@ export const deleteHabitById: AsyncHandler = async (req, res, next) => {
     const userId = req.userId as string;
     const habitId = param(req, 'id');
 
-    // Ownership check
-    const habit = await getHabit(habitId);
-    if (habit.userId !== userId) {
-      res.status(403).json({ status: 'fail', message: 'Unauthorized' });
-      return;
-    }
-
-    const result = await deleteHabit(habitId);
+    const result = await deleteHabit(habitId, userId);
     res.status(200).json(result);
   } catch (error) {
     next(error);
