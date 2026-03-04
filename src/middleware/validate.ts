@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import { ZodSchema } from "zod";
-import { AppError } from "../utils/errors.js";
+import { Request, Response, NextFunction } from 'express';
+import { ZodSchema } from 'zod';
+import { AppError } from '../utils/errors.js';
 
 /**
  * Reusable validation middleware factory.
@@ -16,8 +16,8 @@ export const validate =
     if (!result.success) {
       // Zod v4+: error.issues (renamed from error.errors in v3)
       const message = result.error.issues
-        .map((e) => `${e.path.join(".")}: ${e.message}`)
-        .join(", ");
+        .map((e) => `${e.path.join('.')}: ${e.message}`)
+        .join(', ');
 
       return next(new AppError(message, 400));
     }

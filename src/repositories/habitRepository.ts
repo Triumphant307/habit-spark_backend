@@ -1,14 +1,15 @@
-import type { Habit, HabitEntry, Prisma } from "@prisma/client";
-import { prisma } from "../config/database.js";
-import { HabitData } from "../domain/habit.js";
+import type { Habit, HabitEntry, Prisma } from '@prisma/client';
+import { prisma } from '../config/database.js';
+import { HabitData } from '../domain/habit.js';
 
 // Convenience type used across layers — Habit with its completion history
 export type HabitWithHistory = Habit & { history: HabitEntry[] };
 
 // ── Habit queries ────────────────────────────────────────────────────────────
 
-export const getAll = async (): Promise<HabitWithHistory[]> => {
+export const getAll = async (userId: string): Promise<HabitWithHistory[]> => {
   return await prisma.habit.findMany({
+    where: { userId },
     include: { history: true },
   });
 };
@@ -20,11 +21,11 @@ export const getById = async (id: string): Promise<HabitWithHistory | null> => {
   });
 };
 
-// Upserts on slug to handle duplicate names gracefully on retry
+// Upserts on [userId, slug] to handle duplicate names gracefully on retry
 export const save = async (habit: HabitData): Promise<Habit> => {
-  const { slug, ...rest } = habit;
+  const { userId, slug, ...rest } = habit;
   return await prisma.habit.upsert({
-    where: { slug },
+    where: { userId_slug: { userId, slug } },
     create: habit,
     update: rest,
   });
@@ -85,6 +86,6 @@ export const removeEntry = async (id: string): Promise<HabitEntry> => {
 export const getEntries = async (habitId: string): Promise<HabitEntry[]> => {
   return await prisma.habitEntry.findMany({
     where: { habitId },
-    orderBy: { date: "desc" },
+    orderBy: { date: 'desc' },
   });
 };
