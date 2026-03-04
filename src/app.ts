@@ -1,3 +1,4 @@
+import { env } from './config/env.js';
 import express from 'express';
 import cors from 'cors';
 import habitRoutes from './routes/habitRoutes.js';
@@ -8,7 +9,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: env.FRONTEND_URL,
   }),
 );
 

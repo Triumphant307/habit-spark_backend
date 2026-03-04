@@ -77,7 +77,9 @@ describe('Habit Service CRUD Operations', () => {
     expect(result.message).toMatch(/deleted successfully/);
 
     // Verify it's gone
-    await expect(getHabit(testHabitId, testUserId)).rejects.toThrow('Habit not found');
+    await expect(getHabit(testHabitId, testUserId)).rejects.toThrow(
+      'Habit not found',
+    );
     testHabitId = ''; // empty string is falsy — afterAll guard skips re-deletion
   });
 

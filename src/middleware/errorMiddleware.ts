@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { env } from '../config/env.js';
 
 // Extend the base Error type to include our custom fields from AppError
 interface HttpError extends Error {
@@ -23,7 +24,7 @@ export const errorHandler = (
     status: err.status ?? (statusCode >= 500 ? 'error' : 'fail'),
     statusCode,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    ...(env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
 

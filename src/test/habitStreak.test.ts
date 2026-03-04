@@ -74,9 +74,9 @@ describe('Habit Service Streak Logic', () => {
 
   describe('Negative Tests', () => {
     test('should throw error when toggling completion for non-existent habit', async () => {
-      await expect(completeHabit('invalid-id', '2026-02-22', testUserId)).rejects.toThrow(
-        'Habit not found',
-      );
+      await expect(
+        completeHabit('invalid-id', '2026-02-22', testUserId),
+      ).rejects.toThrow('Habit not found');
     });
   });
 });
