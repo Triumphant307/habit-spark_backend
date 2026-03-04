@@ -1,6 +1,13 @@
 import request from 'supertest';
-import app from '../app.js';
 import { prisma } from '../config/database.js';
+
+// Ensure JWT_SECRET is set before importing app (which registers middleware)
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'test-secret';
+}
+
+// Dynamic import after env is configured
+const { default: app } = await import('../app.js');
 
 describe('Habit API Integration Tests', () => {
   // Definite assignment — populated in the create test before any usage
@@ -24,13 +31,9 @@ describe('Habit API Integration Tests', () => {
     // Generate a mock JWT for the test user
     // Note: In a real app, we'd use the actual signToken utility
     const jwt = (await import('jsonwebtoken')).default;
-    authToken = jwt.sign(
-      { userId: testUserId },
-      process.env.JWT_SECRET || 'test-secret',
-      {
-        expiresIn: '1h',
-      },
-    );
+    authToken = jwt.sign({ userId: testUserId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterAll(async () => {

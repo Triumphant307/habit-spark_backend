@@ -30,6 +30,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://test:test@localhost:5432/habitspark_test
       NODE_ENV: test
+      JWT_SECRET: ci-test-jwt-secret
 
     steps:
       - name: Checkout source
