@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { env } from '../config/env.js';
+import logger from '../lib/logger.js';
 
 // Extend the base Error type to include our custom fields from AppError
 interface HttpError extends Error {
@@ -15,7 +16,7 @@ export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ): void => {
-  console.error(`[Error] ${err.stack}`);
+  logger.error({ err, requestId: req.id }, err.message);
 
   const statusCode = err.statusCode ?? 500;
   const message = err.message ?? 'Internal Server Error';

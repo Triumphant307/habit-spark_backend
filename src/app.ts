@@ -4,8 +4,11 @@ import cors from 'cors';
 import habitRoutes from './routes/habitRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
+import { requestId } from './middleware/requestId.js';
 
 const app = express();
+
+app.use(requestId);
 
 app.use(
   cors({
