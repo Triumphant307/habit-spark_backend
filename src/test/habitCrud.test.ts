@@ -6,6 +6,8 @@ import {
 } from '../services/habitService.js';
 import { createHabitSchema } from '../validators/habitValidators.js';
 import { prisma } from '../config/database.js';
+import logger from '../lib/logger.js';
+import { string } from 'zod';
 
 describe('Habit Service CRUD Operations', () => {
   // Definite assignment — populated in the first test before any usage
@@ -39,6 +41,10 @@ describe('Habit Service CRUD Operations', () => {
         await prisma.habit.delete({ where: { id: testHabitId } });
       } catch (err) {
         // Ignore if already deleted
+        logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete habit'
+        )
       }
     }
     if (testUserId) {
@@ -46,6 +52,10 @@ describe('Habit Service CRUD Operations', () => {
         await prisma.user.delete({ where: { id: testUserId } });
       } catch (err) {
         // Ignore
+         logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete user'
+        )
       }
     }
     await prisma.$disconnect();

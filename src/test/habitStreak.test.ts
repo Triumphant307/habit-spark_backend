@@ -1,9 +1,9 @@
 import {
   addHabit,
   completeHabit,
-  deleteHabit,
 } from '../services/habitService.js';
 import { prisma } from '../config/database.js';
+import logger from '../lib/logger.js';
 
 describe('Habit Service Streak Logic', () => {
   // Definite assignment — populated in beforeAll before any test uses it
@@ -39,6 +39,10 @@ describe('Habit Service Streak Logic', () => {
         await prisma.habit.delete({ where: { id: testHabitId } });
       } catch (err) {
         // Ignore
+        logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete habit'
+        )
       }
     }
     if (testUserId) {
@@ -46,6 +50,10 @@ describe('Habit Service Streak Logic', () => {
         await prisma.user.delete({ where: { id: testUserId } });
       } catch (err) {
         // Ignore
+        logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete user'
+        )
       }
     }
     await prisma.$disconnect();

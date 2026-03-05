@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../lib/auth.js';
+import logger from '../lib/logger.js';
 
 /**
  * Middleware to authenticate requests using JWT.
@@ -28,6 +29,7 @@ export const authenticate = (
     req.userId = decoded.userId;
     next();
   } catch (error) {
+    logger.error(error instanceof Error ? error : String(error), 'Failed to authenticate');
     res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
   }
 };
