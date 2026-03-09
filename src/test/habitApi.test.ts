@@ -56,7 +56,7 @@ describe('Habit API Integration Tests', () => {
         logger.error(
           err instanceof Error ? err : String(err),
           'Failed to delete user',
-        )
+        );
       }
     }
     await prisma.$disconnect();

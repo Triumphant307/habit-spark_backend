@@ -32,10 +32,14 @@ export const register = async (req: Request, res: Response) => {
       message: 'User registered successfully',
       ...result,
     });
-  } catch (error: any) {
+  } catch (error) {
     // Stage 4: Error Handling
-    const status = error.message.includes('exists') ? 409 : 500;
-    res.status(status).json({ error: error.message });
+
+    const status =
+      error instanceof Error && error.message.includes('exists') ? 409 : 500;
+    res.status(status).json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -62,9 +66,12 @@ export const login = async (req: Request, res: Response) => {
       message: 'Login successful',
       ...result,
     });
-  } catch (error: any) {
+  } catch (error) {
     // Stage 4: Error Handling
-    const status = error.message.includes('Invalid') ? 401 : 500;
-    res.status(status).json({ error: error.message });
+    const status =
+      error instanceof Error && error.message.includes('Invalid') ? 401 : 500;
+    res.status(status).json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };

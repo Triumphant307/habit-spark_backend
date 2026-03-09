@@ -13,8 +13,7 @@
     "format:check": "prettier --check .",
     "postinstall": "prisma generate",
     "lint": "eslint src/",
-"lint:fix": "eslint src/ --fix"
-
+    "lint:fix": "eslint src/ --fix"
   },
   "keywords": [],
   "author": "",
