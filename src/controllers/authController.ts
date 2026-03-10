@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/authService.js';
-import { registerSchema, loginSchema } from '../validators/authValidators.js';
 
 /**
  * Handles POST /api/auth/register.

@@ -23,7 +23,7 @@ describe('Authenticate Middleware', () => {
       headers: {},
     };
     mockResponse = {
-      status: jest.fn() as unknown as Response['status'],
+      status: jest.fn().mockReturnThis() as unknown as Response['status'],
       json: jest.fn() as unknown as Response['json'],
     };
     nextFunction = jest.fn();
