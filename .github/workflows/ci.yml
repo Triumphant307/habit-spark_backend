@@ -2,13 +2,52 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
     branches: [main]
 
+# Cancel any in-progress runs for the same branch/PR
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # ── Job 1: Static quality checks (no database needed) ──────────────
+  quality:
+    name: Lint, Format & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate # needed for tsc to resolve Prisma types
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Build
+        run: npm run build
+
+  # ── Job 2: Integration tests (needs Postgres) ─────────────────────
   test:
-    name: Type Check & Test
+    name: Test Suite
     runs-on: ubuntu-latest
 
     services:
@@ -20,7 +59,6 @@ jobs:
           POSTGRES_DB: habitspark_test
         ports:
           - 5432:5432
-        # Wait until Postgres is ready before starting the job steps
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -30,7 +68,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://test:test@localhost:5432/habitspark_test
       NODE_ENV: test
-      JWT_SECRET: ci-test-jwt-secret
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
     steps:
       - name: Checkout source
@@ -40,19 +78,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm # caches npm downloads between runs
+          cache: npm
 
       - name: Install dependencies
-        run: npm ci # clean install from package-lock.json — reproducible
+        run: npm ci
 
       - name: Generate Prisma client
-        run: npx prisma generate # generates typed client and model types used by tsc
-
-      - name: Type check
-        run: npx tsc --noEmit # catches TS errors without writing any output files
+        run: npx prisma generate
 
       - name: Run Prisma migrations
-        run: npx prisma migrate deploy # applies migrations to the fresh test DB
+        run: npx prisma migrate deploy
 
       - name: Run test suite
         run: npm test

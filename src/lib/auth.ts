@@ -4,11 +4,11 @@
  * This module provides helper functions for password hashing (via bcrypt)
  * and JSON Web Token (JWT) management (via jsonwebtoken).
  */
-
+import { env } from '../config/env.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
+const SALT_ROUNDS = env.BCRYPT_SALT_ROUNDS;
 
 /**
  * Hashes a plain-text password using bcrypt.
@@ -43,14 +43,12 @@ export const comparePassword = async (
  * @throws Error if JWT_SECRET is not defined in environment variables.
  */
 export const generateToken = (userId: string): string => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error('JWT_SECRET is not defined');
+  const secret = env.JWT_SECRET;
 
   // We cast the expiresIn value to the expected type from the jsonwebtoken library.
   // This is necessary because process.env variables are typed as 'string | undefined',
   // and the library expects a specific 'StringValue' type (like '1h' or '7d').
-  const expiresIn = (process.env.JWT_EXPIRES_IN ||
-    '7d') as jwt.SignOptions['expiresIn'];
+  const expiresIn = env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'];
 
   return jwt.sign({ userId }, secret, { expiresIn });
 };
@@ -63,7 +61,7 @@ export const generateToken = (userId: string): string => {
  * @throws Error if JWT_SECRET is not defined or the token is invalid/expired.
  */
 export const verifyToken = (token: string) => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error('JWT_SECRET is not defined');
+  const secret = env.JWT_SECRET;
+
   return jwt.verify(token, secret) as { userId: string };
 };

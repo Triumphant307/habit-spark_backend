@@ -1,14 +1,18 @@
+import { env } from './config/env.js';
 import express from 'express';
 import cors from 'cors';
 import habitRoutes from './routes/habitRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
+import { requestId } from './middleware/requestId.js';
 
 const app = express();
 
+app.use(requestId);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: env.FRONTEND_URL,
   }),
 );
 

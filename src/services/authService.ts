@@ -1,6 +1,7 @@
 import * as userRepository from '../repositories/userRepository.js';
 import { hashPassword, comparePassword, generateToken } from '../lib/auth.js';
 import { RegisterInput, LoginInput } from '../validators/authValidators.js';
+import { AppError } from '../utils/errors.js';
 
 /**
  * Handles the registration of a new user.
@@ -14,7 +15,7 @@ import { RegisterInput, LoginInput } from '../validators/authValidators.js';
 export const register = async (data: RegisterInput) => {
   const existingUser = await userRepository.findUserByEmail(data.email);
   if (existingUser) {
-    throw new Error('User with this email already exists');
+    throw new AppError('User with this email already exists', 409);
   }
 
   const hashedPassword = await hashPassword(data.password);
@@ -42,7 +43,7 @@ export const login = async (data: LoginInput) => {
   const user = await userRepository.findUserByEmail(data.email);
 
   if (!user) {
-    throw new Error('Invalid email or password');
+    throw new AppError('Invalid email or password', 401);
   }
 
   const isPasswordValid = await comparePassword(
@@ -50,7 +51,7 @@ export const login = async (data: LoginInput) => {
     user.passwordHash,
   );
   if (!isPasswordValid) {
-    throw new Error('Invalid email or password');
+    throw new AppError('Invalid email or password', 401);
   }
 
   const token = generateToken(user.id);

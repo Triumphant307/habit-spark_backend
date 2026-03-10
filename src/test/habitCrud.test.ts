@@ -6,6 +6,7 @@ import {
 } from '../services/habitService.js';
 import { createHabitSchema } from '../validators/habitValidators.js';
 import { prisma } from '../config/database.js';
+import logger from '../lib/logger.js';
 
 describe('Habit Service CRUD Operations', () => {
   // Definite assignment — populated in the first test before any usage
@@ -39,6 +40,10 @@ describe('Habit Service CRUD Operations', () => {
         await prisma.habit.delete({ where: { id: testHabitId } });
       } catch (err) {
         // Ignore if already deleted
+        logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete habit',
+        );
       }
     }
     if (testUserId) {
@@ -46,6 +51,10 @@ describe('Habit Service CRUD Operations', () => {
         await prisma.user.delete({ where: { id: testUserId } });
       } catch (err) {
         // Ignore
+        logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete user',
+        );
       }
     }
     await prisma.$disconnect();
@@ -60,29 +69,31 @@ describe('Habit Service CRUD Operations', () => {
   });
 
   test('should fetch a single habit by id', async () => {
-    const habit = await getHabit(testHabitId);
+    const habit = await getHabit(testHabitId, testUserId);
     expect(habit.id).toBe(testHabitId);
     expect(habit.category).toBe(habitData.category);
   });
 
   test('should update habit details', async () => {
     const updateData = { title: 'Updated CRUD Habit', target: 10 };
-    const updated = await updateHabit(testHabitId, updateData);
+    const updated = await updateHabit(testHabitId, updateData, testUserId);
     expect(updated.title).toBe(updateData.title);
     expect(updated.target).toBe(updateData.target);
   });
 
   test('should delete a habit', async () => {
-    const result = await deleteHabit(testHabitId);
+    const result = await deleteHabit(testHabitId, testUserId);
     expect(result.message).toMatch(/deleted successfully/);
 
     // Verify it's gone
-    await expect(getHabit(testHabitId)).rejects.toThrow('Habit not found');
+    await expect(getHabit(testHabitId, testUserId)).rejects.toThrow(
+      'Habit not found',
+    );
     testHabitId = ''; // empty string is falsy — afterAll guard skips re-deletion
   });
 
   test('should throw error when fetching non-existent habit', async () => {
-    await expect(getHabit('non-existent-id')).rejects.toThrow(
+    await expect(getHabit('non-existent-id', testUserId)).rejects.toThrow(
       'Habit not found',
     );
   });

@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { prisma } from '../config/database.js';
+import logger from '../lib/logger.js';
 
 // Ensure JWT_SECRET is set before importing app (which registers middleware)
 if (!process.env.JWT_SECRET) {
@@ -43,6 +44,10 @@ describe('Habit API Integration Tests', () => {
         await prisma.habit.delete({ where: { id: testHabitId } });
       } catch (err) {
         // Ignore
+        logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete habit',
+        );
       }
     }
     // Cleanup test user
@@ -51,6 +56,10 @@ describe('Habit API Integration Tests', () => {
         await prisma.user.delete({ where: { id: testUserId } });
       } catch (err) {
         // Ignore
+        logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete user',
+        );
       }
     }
     await prisma.$disconnect();

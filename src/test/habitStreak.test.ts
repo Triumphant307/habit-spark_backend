@@ -1,9 +1,6 @@
-import {
-  addHabit,
-  completeHabit,
-  deleteHabit,
-} from '../services/habitService.js';
+import { addHabit, completeHabit } from '../services/habitService.js';
 import { prisma } from '../config/database.js';
+import logger from '../lib/logger.js';
 
 describe('Habit Service Streak Logic', () => {
   // Definite assignment — populated in beforeAll before any test uses it
@@ -39,6 +36,10 @@ describe('Habit Service Streak Logic', () => {
         await prisma.habit.delete({ where: { id: testHabitId } });
       } catch (err) {
         // Ignore
+        logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete habit',
+        );
       }
     }
     if (testUserId) {
@@ -46,6 +47,10 @@ describe('Habit Service Streak Logic', () => {
         await prisma.user.delete({ where: { id: testUserId } });
       } catch (err) {
         // Ignore
+        logger.error(
+          err instanceof Error ? err : String(err),
+          'Failed to delete user',
+        );
       }
     }
     await prisma.$disconnect();
@@ -56,17 +61,17 @@ describe('Habit Service Streak Logic', () => {
     const date2 = '2026-02-22';
 
     // First completion
-    const res1 = await completeHabit(testHabitId, date1);
+    const res1 = await completeHabit(testHabitId, date1, testUserId);
     expect(res1.isNowCompleted).toBe(true);
     expect(res1.streak).toBe(1);
 
     // Second consecutive completion
-    const res2 = await completeHabit(testHabitId, date2);
+    const res2 = await completeHabit(testHabitId, date2, testUserId);
     expect(res2.isNowCompleted).toBe(true);
     expect(res2.streak).toBe(2);
 
     // Un-toggle date1
-    const res3 = await completeHabit(testHabitId, date1);
+    const res3 = await completeHabit(testHabitId, date1, testUserId);
     expect(res3.isNowCompleted).toBe(false);
     // Streak for date2 becomes 1 when the preceding completion is removed
     expect(res3.streak).toBe(1);
@@ -74,9 +79,9 @@ describe('Habit Service Streak Logic', () => {
 
   describe('Negative Tests', () => {
     test('should throw error when toggling completion for non-existent habit', async () => {
-      await expect(completeHabit('invalid-id', '2026-02-22')).rejects.toThrow(
-        'Habit not found',
-      );
+      await expect(
+        completeHabit('invalid-id', '2026-02-22', testUserId),
+      ).rejects.toThrow('Habit not found');
     });
   });
 });

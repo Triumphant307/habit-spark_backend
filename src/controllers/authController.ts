@@ -1,70 +1,52 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/authService.js';
-import { registerSchema, loginSchema } from '../validators/authValidators.js';
 
 /**
- * Controller for user registration.
+ * Handles POST /api/auth/register.
  *
- * Flow:
- * 1. Validate the body against the Zod schema.
- * 2. Send 400 Bad Request if validation fails.
- * 3. Call the auth service to perform business logic.
- * 4. Respond with 201 Created and the token/user data.
- * 5. Handle specific service errors (like email already exists).
+ * Delegates user creation to the auth service and responds
+ * with 201 and the generated JWT token + user data.
+ * Errors (e.g. duplicate email) are forwarded to the
+ * centralized error-handling middleware via next().
  */
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    // Stage 1: Validation
-    const validation = registerSchema.safeParse(req.body);
-    if (!validation.success) {
-      res.status(400).json({
-        error: 'Validation failed',
-        details: validation.error.format(),
-      });
-      return;
-    }
+    const result = await authService.register(req.body);
 
-    // Stage 2: Business Logic execution
-    const result = await authService.register(validation.data);
-
-    // Stage 3: Success Response
     res.status(201).json({
       message: 'User registered successfully',
       ...result,
     });
-  } catch (error: any) {
-    // Stage 4: Error Handling
-    const status = error.message.includes('exists') ? 409 : 500;
-    res.status(status).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
 /**
- * Controller for user login.
+ * Handles POST /api/auth/login.
+ *
+ * Delegates credential verification to the auth service and
+ * responds with 200 and the generated JWT token + user data.
+ * Invalid credentials or other errors are forwarded to the
+ * centralized error-handling middleware via next().
  */
-export const login = async (req: Request, res: Response) => {
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    // Stage 1: Validation
-    const validation = loginSchema.safeParse(req.body);
-    if (!validation.success) {
-      res.status(400).json({
-        error: 'Validation failed',
-        details: validation.error.format(),
-      });
-      return;
-    }
+    const result = await authService.login(req.body);
 
-    // Stage 2: Business Logic execution
-    const result = await authService.login(validation.data);
-
-    // Stage 3: Success Response
     res.status(200).json({
       message: 'Login successful',
       ...result,
     });
-  } catch (error: any) {
-    // Stage 4: Error Handling
-    const status = error.message.includes('Invalid') ? 401 : 500;
-    res.status(status).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };
