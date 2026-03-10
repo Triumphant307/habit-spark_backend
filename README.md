@@ -1,5 +1,7 @@
 # HabitSpark API
 
+![CI](https://github.com/Triumphant307/habit-spark_backend/actions/workflows/ci.yml/badge.svg)
+
 A REST API for tracking daily habits, managing streaks, and recording completion history. Built with **TypeScript**, **Express 5**, **Prisma 7**, and **PostgreSQL**.
 
 ## Table of Contents
@@ -320,14 +322,25 @@ npm run test:watch
 
 ## CI Pipeline
 
-GitHub Actions runs on every push and pull request to `main`. The workflow (`.github/workflows/ci.yml`) performs:
+GitHub Actions runs on every push to `main`/`dev` and on pull requests to `main`. A **concurrency group** automatically cancels superseded runs on the same branch.
 
-1. **Spin up PostgreSQL 16** as a service container.
-2. **Install dependencies** via `npm ci`.
-3. **Generate Prisma client** to ensure types are available.
-4. **Type check** via `tsc --noEmit`.
-5. **Apply migrations** to the test database.
-6. **Run the full test suite.**
+The workflow (`.github/workflows/ci.yml`) runs two parallel jobs:
+
+### Quality (no database)
+
+1. **Install dependencies** via `npm ci`.
+2. **Generate Prisma client** (needed for type resolution).
+3. **Type check** via `tsc --noEmit`.
+4. **Lint** via `eslint`.
+5. **Check formatting** via `prettier --check`.
+6. **Build** via `tsc`.
+
+### Test Suite (PostgreSQL 16 service)
+
+1. **Install dependencies** via `npm ci`.
+2. **Generate Prisma client**.
+3. **Apply migrations** to the test database.
+4. **Run the full test suite.**
 
 ---
 
