@@ -39,3 +39,6 @@ build/
 # Agent and Platform specific
 .gemini/
 .turbo/
+.agent
+GEMINI.md
+V2_IMPLEMENTATION_PLAN.md
