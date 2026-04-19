@@ -1,20 +1,29 @@
 import { Router } from 'express';
-import { registerSchema, loginSchema } from '../validators/authValidators.js';
+import { signupSchema, loginSchema } from '../validators/authValidators.js';
 import { validate } from '../middleware/validate.js';
 import * as authController from '../controllers/authController.js';
+import { authenticate } from '../middleware/authenticate.js';
 
 const router = Router();
 
 /**
- * Route: POST /api/auth/register
- * Description: Registers a new user and returns a JWT token.
+ * Route: POST /auth/signup
  */
-router.post('/register', validate(registerSchema), authController.register);
+router.post('/signup', validate(signupSchema), authController.signup);
 
 /**
- * Route: POST /api/auth/login
- * Description: Authenticates a user and returns a JWT token.
+ * Route: POST /auth/login
  */
 router.post('/login', validate(loginSchema), authController.login);
+
+/**
+ * Route: POST /auth/logout
+ */
+router.post('/logout', authenticate, authController.logout);
+
+/**
+ * Route: GET /auth/me
+ */
+router.get('/me', authenticate, authController.getMe);
 
 export default router;

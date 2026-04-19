@@ -42,3 +42,4 @@ build/
 .agent
 GEMINI.md
 V2_IMPLEMENTATION_PLAN.md
+BACKEND_API_SPEC.md

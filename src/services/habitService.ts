@@ -124,3 +124,83 @@ export const deleteHabit = async (
   await habitRepository.remove(id);
   return { habitId: habit.id, message: 'Habit deleted successfully' };
 };
+
+export const resetHabitStreak = async (
+  id: string,
+  userId: string,
+): Promise<Habit> => {
+  const habit = await habitRepository.getById(id);
+  if (!habit) throw new AppError('Habit not found', 404);
+  if (habit.userId !== userId) throw new AppError('Forbidden', 403);
+
+  return await habitRepository.resetStreak(id);
+};
+
+export const reorderHabits = async (
+  idArray: string[],
+  userId: string,
+): Promise<{ message: string }> => {
+  // Validate all habits belong to the user
+  const habits = await habitRepository.getAll(userId);
+  const userHabitIds = new Set(habits.map((h) => h.id));
+
+  const allValid = idArray.every((id) => userHabitIds.has(id));
+  if (!allValid) {
+    throw new AppError('Invalid habit IDs provided for reordering', 400);
+  }
+
+  await habitRepository.reorderHabits(idArray);
+  return { message: 'Habits reordered successfully' };
+};
+
+export const getHabitStats = async (
+  id: string,
+  userId: string,
+): Promise<{
+  totalCompletions: number;
+  currentStreak: number;
+  longestStreak: number;
+  completionRate: number;
+}> => {
+  const habit = await habitRepository.getById(id);
+  if (!habit) throw new AppError('Habit not found', 404);
+  if (habit.userId !== userId) throw new AppError('Forbidden', 403);
+
+  const entries = await habitRepository.getEntries(id);
+  const totalCompletions = entries.length;
+
+  // Longest streak calculation
+  let longestStreak = 0;
+  if (entries.length > 0) {
+    const dates = entries.map((e) => e.date).sort((a, b) => b.getTime() - a.getTime());
+    let currentCount = 1;
+    let maxCount = 1;
+
+    for (let i = 0; i < dates.length - 1; i++) {
+      const diffTime = Math.abs(dates[i].getTime() - dates[i + 1].getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        currentCount++;
+      } else {
+        maxCount = Math.max(maxCount, currentCount);
+        currentCount = 1;
+      }
+    }
+    longestStreak = Math.max(maxCount, currentCount);
+  }
+
+  // Completion rate since tracking start date or creation
+  const start = habit.trackingStartDate || habit.createdAt;
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - start.getTime());
+  const totalDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  const completionRate = Number((totalCompletions / totalDays).toFixed(2));
+
+  return {
+    totalCompletions,
+    currentStreak: habit.streak,
+    longestStreak,
+    completionRate,
+  };
+};

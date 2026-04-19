@@ -1,18 +1,12 @@
 import * as userRepository from '../repositories/userRepository.js';
 import { hashPassword, comparePassword, generateToken } from '../lib/auth.js';
-import { RegisterInput, LoginInput } from '../validators/authValidators.js';
+import { SignupInput, LoginInput } from '../validators/authValidators.js';
 import { AppError } from '../utils/errors.js';
 
 /**
- * Handles the registration of a new user.
- *
- * Logic:
- * 1. Check if the user already exists to provide a clean error message.
- * 2. Hash the password for security (never store plain text).
- * 3. Save the new user via the repository.
- * 4. Return a JWT so the user is "logged in" immediately after signing up.
+ * Handles the signup of a new user.
  */
-export const register = async (data: RegisterInput) => {
+export const signup = async (data: SignupInput) => {
   const existingUser = await userRepository.findUserByEmail(data.email);
   if (existingUser) {
     throw new AppError('User with this email already exists', 409);
@@ -22,7 +16,7 @@ export const register = async (data: RegisterInput) => {
 
   const user = await userRepository.createUser({
     ...data,
-    password: hashedPassword,
+    passwordHash: hashedPassword,
   });
 
   const token = generateToken(user.id);
@@ -32,12 +26,6 @@ export const register = async (data: RegisterInput) => {
 
 /**
  * Handles user login.
- *
- * Logic:
- * 1. Retrieve the user by email (includes the hashed password).
- * 2. Verify the password using bcrypt.
- * 3. If valid, return a fresh JWT.
- * 4. Uses generic error messages to prevent "user enumeration" attacks.
  */
 export const login = async (data: LoginInput) => {
   const user = await userRepository.findUserByEmail(data.email);
@@ -57,4 +45,23 @@ export const login = async (data: LoginInput) => {
   const token = generateToken(user.id);
 
   return { user, token };
+};
+
+/**
+ * Retrieves the current user's profile.
+ */
+export const getUserProfile = async (userId: string) => {
+  const user = await userRepository.findUserById(userId);
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+  return user;
+};
+
+/**
+ * Handles user logout.
+ * For stateless JWT, this primarily returns a success response.
+ */
+export const logout = async () => {
+  return { message: 'Logged out successfully' };
 };

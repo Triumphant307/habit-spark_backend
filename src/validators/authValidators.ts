@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
 /**
- * Schema for user registration.
+ * Schema for user signup.
  * Ensures data quality and provides types for the rest of the application.
  */
-export const registerSchema = z.object({
+export const signupSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
-  name: z.string().optional(),
+  nickname: z.string().optional(),
 });
 
 /**
@@ -19,5 +19,5 @@ export const loginSchema = z.object({
 });
 
 // Infer types from the schemas
-export type RegisterInput = z.infer<typeof registerSchema>;
+export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

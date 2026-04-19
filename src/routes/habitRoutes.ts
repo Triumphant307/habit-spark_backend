@@ -6,6 +6,9 @@ import {
   toggleHabitCompletion,
   updateHabitDetails,
   deleteHabitById,
+  resetHabit,
+  getStats,
+  reorder,
 } from '../controllers/habitController.js';
 import { validate } from '../middleware/validate.js';
 import {
@@ -30,11 +33,20 @@ router.get('/:id', getHabitById);
 router.post('/', validate(createHabitSchema), createNewHabit);
 
 // Toggle habit completion for a date
-router.patch(
+router.post(
   '/:id/complete',
   validate(completeHabitSchema),
   toggleHabitCompletion,
 );
+
+// Reset habit streak
+router.post('/:id/reset', resetHabit);
+
+// Get habit stats
+router.get('/:id/stats', getStats);
+
+// Reorder habits
+router.post('/reorder', reorder);
 
 // Update a habit's details
 router.patch('/:id', validate(updateHabitSchema), updateHabitDetails);

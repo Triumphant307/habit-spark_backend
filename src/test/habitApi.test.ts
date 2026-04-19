@@ -148,10 +148,10 @@ describe('Habit API Integration Tests', () => {
     });
   });
 
-  describe('PATCH /habits/:id/complete - Negative', () => {
+  describe('POST /habits/:id/complete - Negative', () => {
     test('should return 404 for toggling non-existent habit', async () => {
       const res = await request(app)
-        .patch('/habits/non-existent-id/complete')
+        .post('/habits/non-existent-id/complete')
         .set('Authorization', `Bearer ${authToken}`)
         .send({ date: '2026-02-22' });
       expect(res.status).toBe(404);
@@ -185,10 +185,10 @@ describe('Habit API Integration Tests', () => {
     });
   });
 
-  describe('PATCH /habits/:id/complete', () => {
+  describe('POST /habits/:id/complete', () => {
     test('should toggle habit completion', async () => {
       const res = await request(app)
-        .patch(`/habits/${testHabitId}/complete`)
+        .post(`/habits/${testHabitId}/complete`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({ date: '2026-02-22' });
 

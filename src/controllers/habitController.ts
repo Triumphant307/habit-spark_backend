@@ -1,12 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import {
-  addHabit,
-  listHabits,
-  getHabit,
-  updateHabit,
-  completeHabit,
-  deleteHabit,
-} from '../services/habitService.js';
+import * as habitService from '../services/habitService.js';
 
 // Shorthand type for standard Express async controller functions
 type AsyncHandler = (
@@ -23,7 +16,7 @@ const param = (req: Request, key: string): string => String(req.params[key]);
 export const getAllHabits: AsyncHandler = async (req, res, next) => {
   try {
     const userId = req.userId as string;
-    const habits = await listHabits(userId);
+    const habits = await habitService.listHabits(userId);
     res.json(habits);
   } catch (error) {
     next(error);
@@ -34,7 +27,7 @@ export const getAllHabits: AsyncHandler = async (req, res, next) => {
 export const getHabitById: AsyncHandler = async (req, res, next) => {
   try {
     const userId = req.userId as string;
-    const habit = await getHabit(param(req, 'id'), userId);
+    const habit = await habitService.getHabit(param(req, 'id'), userId);
 
     res.json(habit);
   } catch (error) {
@@ -42,38 +35,38 @@ export const getHabitById: AsyncHandler = async (req, res, next) => {
   }
 };
 
-// Add a new habit — body validated by createHabitSchema middleware
+// Add a new habit
 export const createNewHabit: AsyncHandler = async (req, res, next) => {
   try {
     const userId = req.userId as string;
-    const habit = await addHabit({ ...req.body, userId });
+    const habit = await habitService.addHabit({ ...req.body, userId });
     res.status(201).json(habit);
   } catch (error) {
     next(error);
   }
 };
 
-// Toggle habit completion for a date — body validated by completeHabitSchema middleware
+// Toggle habit completion for a date
 export const toggleHabitCompletion: AsyncHandler = async (req, res, next) => {
   try {
     const userId = req.userId as string;
     const habitId = param(req, 'id');
     const { date } = req.body as { date: string };
 
-    const result = await completeHabit(habitId, date, userId);
+    const result = await habitService.completeHabit(habitId, date, userId);
     res.json(result);
   } catch (error) {
     next(error);
   }
 };
 
-// Update a habit's details — body validated by updateHabitSchema middleware
+// Update a habit's details
 export const updateHabitDetails: AsyncHandler = async (req, res, next) => {
   try {
     const userId = req.userId as string;
     const habitId = param(req, 'id');
 
-    const updated = await updateHabit(habitId, req.body, userId);
+    const updated = await habitService.updateHabit(habitId, req.body, userId);
     res.json(updated);
   } catch (error) {
     next(error);
@@ -86,8 +79,50 @@ export const deleteHabitById: AsyncHandler = async (req, res, next) => {
     const userId = req.userId as string;
     const habitId = param(req, 'id');
 
-    const result = await deleteHabit(habitId, userId);
+    const result = await habitService.deleteHabit(habitId, userId);
     res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Handles POST /habits/:id/reset.
+ */
+export const resetHabit: AsyncHandler = async (req, res, next) => {
+  try {
+    const userId = req.userId as string;
+    const habitId = param(req, 'id');
+    const habit = await habitService.resetHabitStreak(habitId, userId);
+    res.json(habit);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Handles GET /habits/:id/stats.
+ */
+export const getStats: AsyncHandler = async (req, res, next) => {
+  try {
+    const userId = req.userId as string;
+    const habitId = param(req, 'id');
+    const stats = await habitService.getHabitStats(habitId, userId);
+    res.json(stats);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Handles POST /habits/reorder.
+ */
+export const reorder: AsyncHandler = async (req, res, next) => {
+  try {
+    const userId = req.userId as string;
+    const { idArray } = req.body as { idArray: string[] };
+    const result = await habitService.reorderHabits(idArray, userId);
+    res.json(result);
   } catch (error) {
     next(error);
   }

@@ -1,5 +1,5 @@
 import { prisma } from '../config/database.js';
-import { RegisterInput } from '../validators/authValidators.js';
+import { SignupInput } from '../validators/authValidators.js';
 
 /**
  * Finds a user in the database by their email address.
@@ -14,17 +14,29 @@ export const findUserByEmail = async (email: string) => {
 };
 
 /**
+ * Finds a user in the database by their ID.
+ *
+ * @param id - The user ID to search for.
+ * @returns The user object if found, otherwise null.
+ */
+export const findUserById = async (id: string) => {
+  return await prisma.user.findUnique({
+    where: { id },
+  });
+};
+
+/**
  * Creates a new user record in the database.
  *
- * @param data - The user registration data (email, name, hashed password).
+ * @param data - The user signup data (email, nickname, hashed password).
  * @returns The newly created user object.
  */
-export const createUser = async (data: RegisterInput) => {
+export const createUser = async (data: SignupInput & { passwordHash: string }) => {
   return await prisma.user.create({
     data: {
       email: data.email,
-      passwordHash: data.password, // This should be already hashed by the service
-      name: data.name,
+      passwordHash: data.passwordHash,
+      name: data.nickname,
     },
   });
 };
