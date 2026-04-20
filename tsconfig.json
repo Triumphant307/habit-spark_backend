@@ -28,7 +28,8 @@
 
     /* Decorators — not used yet but required if Prisma decorators are ever needed */
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "types": ["node", "jest"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
