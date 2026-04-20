@@ -44,7 +44,11 @@ export const login = async (
 /**
  * Handles GET /auth/me.
  */
-export const getMe = async (req: Request, res: Response, next: NextFunction) => {
+export const getMe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const user = await authService.getUserProfile(req.userId as string);
     res.status(200).json({ user });

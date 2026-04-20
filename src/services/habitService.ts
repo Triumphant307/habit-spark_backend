@@ -172,7 +172,9 @@ export const getHabitStats = async (
   // Longest streak calculation
   let longestStreak = 0;
   if (entries.length > 0) {
-    const dates = entries.map((e) => e.date).sort((a, b) => b.getTime() - a.getTime());
+    const dates = entries
+      .map((e) => e.date)
+      .sort((a, b) => b.getTime() - a.getTime());
     let currentCount = 1;
     let maxCount = 1;
 

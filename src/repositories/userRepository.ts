@@ -31,7 +31,9 @@ export const findUserById = async (id: string) => {
  * @param data - The user signup data (email, nickname, hashed password).
  * @returns The newly created user object.
  */
-export const createUser = async (data: SignupInput & { passwordHash: string }) => {
+export const createUser = async (
+  data: SignupInput & { passwordHash: string },
+) => {
   return await prisma.user.create({
     data: {
       email: data.email,

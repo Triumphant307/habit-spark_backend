@@ -9,14 +9,14 @@ export type HabitWithHistory = Habit & { history: HabitEntry[] };
 
 export const getAll = async (userId: string): Promise<HabitWithHistory[]> => {
   return await prisma.habit.findMany({
-    where: { 
+    where: {
       userId,
-      deletedAt: null 
+      deletedAt: null,
     },
-    include: { 
+    include: {
       history: {
-        where: { deletedAt: null }
-      } 
+        where: { deletedAt: null },
+      },
     },
     orderBy: { order: 'asc' },
   });
@@ -25,10 +25,10 @@ export const getAll = async (userId: string): Promise<HabitWithHistory[]> => {
 export const getById = async (id: string): Promise<HabitWithHistory | null> => {
   return await prisma.habit.findFirst({
     where: { id, deletedAt: null },
-    include: { 
+    include: {
       history: {
-        where: { deletedAt: null }
-      }
+        where: { deletedAt: null },
+      },
     },
   });
 };
@@ -54,10 +54,10 @@ export const update = async (
   return await prisma.habit.update({
     where: { id },
     data: data as Prisma.HabitUpdateInput,
-    include: { 
+    include: {
       history: {
-        where: { deletedAt: null }
-      }
+        where: { deletedAt: null },
+      },
     },
   });
 };
@@ -79,10 +79,10 @@ export const updateStreak = async (
   return await prisma.habit.update({
     where: { id: habitId },
     data: { streak },
-    include: { 
+    include: {
       history: {
-        where: { deletedAt: null }
-      }
+        where: { deletedAt: null },
+      },
     },
   });
 };
@@ -106,8 +106,8 @@ export const reorderHabits = async (idArray: string[]) => {
       prisma.habit.update({
         where: { id },
         data: { order: index },
-      })
-    )
+      }),
+    ),
   );
 };
 
@@ -118,8 +118,8 @@ export const findEntry = async (
   date: Date,
 ): Promise<HabitEntry | null> => {
   return await prisma.habitEntry.findUnique({
-    where: { 
-      habitId_date: { habitId, date }
+    where: {
+      habitId_date: { habitId, date },
     },
   });
 };
@@ -140,17 +140,17 @@ export const addEntry = async (
 };
 
 export const removeEntry = async (id: string): Promise<HabitEntry> => {
-  return await prisma.habitEntry.update({ 
+  return await prisma.habitEntry.update({
     where: { id },
-    data: { deletedAt: new Date() }
+    data: { deletedAt: new Date() },
   });
 };
 
 export const getEntries = async (habitId: string): Promise<HabitEntry[]> => {
   return await prisma.habitEntry.findMany({
-    where: { 
+    where: {
       habitId,
-      deletedAt: null 
+      deletedAt: null,
     },
     orderBy: { date: 'desc' },
   });

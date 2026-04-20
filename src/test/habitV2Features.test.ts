@@ -26,7 +26,9 @@ describe('Habit V2 Features Integration Tests', () => {
     userId = user.id;
 
     const jwt = (await import('jsonwebtoken')).default;
-    authToken = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
 
     const h1 = await prisma.habit.create({
       data: {
@@ -83,12 +85,16 @@ describe('Habit V2 Features Integration Tests', () => {
     test('should return habit stats', async () => {
       // Add some entries
       const today = new Date();
-      today.setUTCHours(0,0,0,0);
+      today.setUTCHours(0, 0, 0, 0);
       const yesterday = new Date(today);
       yesterday.setUTCDate(today.getUTCDate() - 1);
 
-      await prisma.habitEntry.create({ data: { habitId: habitId1, date: today } });
-      await prisma.habitEntry.create({ data: { habitId: habitId1, date: yesterday } });
+      await prisma.habitEntry.create({
+        data: { habitId: habitId1, date: today },
+      });
+      await prisma.habitEntry.create({
+        data: { habitId: habitId1, date: yesterday },
+      });
 
       const res = await request(app)
         .get(`/habits/${habitId1}/stats`)
@@ -121,21 +127,29 @@ describe('Habit V2 Features Integration Tests', () => {
     });
 
     test('should fail if habit belongs to another user', async () => {
-        const otherUser = await prisma.user.create({
-            data: { email: 'other@example.com', passwordHash: 'hash' }
-        });
-        const otherHabit = await prisma.habit.create({
-            data: { title: 'Other', icon: 'O', category: 'C', target: 1, userId: otherUser.id, slug: 'other', startDate: new Date() }
-        });
+      const otherUser = await prisma.user.create({
+        data: { email: 'other@example.com', passwordHash: 'hash' },
+      });
+      const otherHabit = await prisma.habit.create({
+        data: {
+          title: 'Other',
+          icon: 'O',
+          category: 'C',
+          target: 1,
+          userId: otherUser.id,
+          slug: 'other',
+          startDate: new Date(),
+        },
+      });
 
-        const res = await request(app)
-          .post('/habits/reorder')
-          .set('Authorization', `Bearer ${authToken}`)
-          .send({ idArray: [otherHabit.id] });
+      const res = await request(app)
+        .post('/habits/reorder')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ idArray: [otherHabit.id] });
 
-        expect(res.status).toBe(400);
+      expect(res.status).toBe(400);
 
-        await prisma.user.delete({ where: { id: otherUser.id } });
+      await prisma.user.delete({ where: { id: otherUser.id } });
     });
   });
 });
