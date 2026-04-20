@@ -19,20 +19,31 @@ model User {
   name                String?
   passwordHash        String
 
+  // Relations
+  preferences         UserPreference?
+  habits              Habit[]
+  favoriteSuggestions UserSuggestionFavorite[]
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model UserPreference {
+  id                   String   @id @default(cuid())
+  
   // UI Preferences
-  theme               String?  @default("light")
-  sidebarCollapsed    Boolean? @default(false)
+  theme                String?  @default("light")
+  sidebarCollapsed     Boolean? @default(false)
 
   // Onboarding Data
   onboardingGoal       String?
   onboardingCommitment String?
 
   // Relations
-  habits              Habit[]
-  favoriteSuggestions UserSuggestionFavorite[]
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  updatedAt            DateTime @updatedAt
 }
 
 model Habit {
