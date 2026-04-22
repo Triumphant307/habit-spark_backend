@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import habitRoutes from './routes/habitRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import { requestId } from './middleware/requestId.js';
 
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/auth', authRoutes);
 app.use('/habits', habitRoutes);
+app.use('/user', userRoutes);
 
 // Error Handling Middleware
 app.use(notFound);

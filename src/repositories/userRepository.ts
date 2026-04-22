@@ -41,3 +41,27 @@ export const createUser = async (
     include: { preferences: true },
   });
 };
+
+/**
+ * Updates a user's basic profile (e.g., name/nickname).
+ */
+export const updateUser = async (id: string, data: { name?: string }) => {
+  return await prisma.user.update({
+    where: { id },
+    data,
+    include: { preferences: true },
+  });
+};
+
+/**
+ * Updates a user's preferences.
+ */
+export const updatePreferences = async (
+  userId: string,
+  data: Record<string, string | boolean | number>,
+) => {
+  return await prisma.userPreference.update({
+    where: { userId },
+    data,
+  });
+};
