@@ -4,17 +4,16 @@ import { AppError } from '../utils/errors.js';
 
 /**
  * Reusable validation middleware factory.
- * Accepts a Zod schema, runs safeParse on req.body, and either:
- *   - calls next() with the parsed (coerced) data attached to req.body, or
- *   - calls next(AppError) with a 400 and all validation messages joined.
+ * Accepts a Zod schema and an optional source ('body' | 'query').
+ * Runs safeParse and attaches the result back to the request object.
  */
 export const validate =
-  (schema: ZodSchema) =>
+  (schema: ZodSchema, source: 'body' | 'query' = 'body') =>
   (req: Request, res: Response, next: NextFunction): void => {
-    const result = schema.safeParse(req.body);
+    const dataToValidate = source === 'query' ? req.query : req.body;
+    const result = schema.safeParse(dataToValidate);
 
     if (!result.success) {
-      // Zod v4+: error.issues (renamed from error.errors in v3)
       const message = result.error.issues
         .map((e) => `${e.path.join('.')}: ${e.message}`)
         .join(', ');
@@ -22,7 +21,19 @@ export const validate =
       return next(new AppError(message, 400));
     }
 
-    // Replace req.body with the parsed (coerced + stripped) data
-    req.body = result.data;
+    // Attach parsed/coerced data back to the correct source
+    if (source === 'query') {
+      // Express 5 makes req.query a read-only getter.
+      // We use defineProperty to override it with our validated/transformed data.
+      Object.defineProperty(req, 'query', {
+        value: result.data,
+        writable: true,
+        configurable: true,
+        enumerable: true,
+      });
+    } else {
+      req.body = result.data;
+    }
+    
     next();
   };
