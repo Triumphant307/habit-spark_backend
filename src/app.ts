@@ -5,6 +5,7 @@ import habitRoutes from './routes/habitRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import suggestionRoutes from './routes/suggestionRoutes.js';
+import syncRoutes from './routes/syncRoutes.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import { requestId } from './middleware/requestId.js';
 
@@ -29,6 +30,7 @@ app.use('/auth', authRoutes);
 app.use('/habits', habitRoutes);
 app.use('/user', userRoutes);
 app.use('/suggestions', suggestionRoutes);
+app.use('/sync', syncRoutes);
 
 // Error Handling Middleware
 app.use(notFound);

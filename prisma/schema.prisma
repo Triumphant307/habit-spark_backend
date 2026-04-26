@@ -91,6 +91,8 @@ model HabitEntry {
   habitId   String
   habit     Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
+  updatedAt DateTime  @updatedAt
+
   @@unique([habitId, date]) // prevent duplicate entries for same day
   @@index([habitId, deletedAt])
 }
