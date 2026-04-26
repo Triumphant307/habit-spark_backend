@@ -38,33 +38,49 @@ export const applyPushDelta = async (userId: string, data: PushSyncInput) => {
       const existing = await tx.habit.findUnique({ where: { id: habit.id } });
       if (existing?.deletedAt) continue; // Server Wins (Integrity)
 
+      // Prepare habit data with Date objects and mandatory fields
+      const habitData = {
+        ...habit,
+        startDate: new Date(habit.startDate),
+        updatedAt: new Date(habit.updatedAt),
+        userId,
+        slug: habit.title.toLowerCase().replace(/ /g, '-'),
+      };
+
       await tx.habit.upsert({
         where: { id: habit.id },
-        create: { ...habit, userId, slug: habit.title.toLowerCase().replace(/ /g, '-') },
-        update: { ...habit, deletedAt: null },
+        create: habitData,
+        update: { ...habitData, deletedAt: null },
       });
     }
 
     // 2. Process Entry Upserts
     for (const entry of data.entries) {
+      const entryData = {
+        ...entry,
+        date: new Date(entry.date),
+        updatedAt: new Date(entry.updatedAt),
+      };
+
       await tx.habitEntry.upsert({
         where: { id: entry.id },
-        create: { ...entry },
-        update: { ...entry, deletedAt: null },
+        create: entryData,
+        update: { ...entryData, deletedAt: null },
       });
     }
 
     // 3. Process Soft Deletes
     if (data.deletedIds.length > 0) {
+      const now = new Date();
       await tx.habit.updateMany({
         where: { id: { in: data.deletedIds }, userId },
-        data: { deletedAt: new Date() },
+        data: { deletedAt: now },
       });
       
       // Also soft-delete entries associated with these habits
       await tx.habitEntry.updateMany({
         where: { habitId: { in: data.deletedIds } },
-        data: { deletedAt: new Date() },
+        data: { deletedAt: now },
       });
     }
     

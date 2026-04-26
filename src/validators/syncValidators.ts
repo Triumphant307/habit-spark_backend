@@ -18,6 +18,7 @@ export const pushSyncSchema = z.object({
     icon: z.string(),
     target: z.number(),
     category: z.string(),
+    startDate: z.string().datetime({ offset: true }), // Required for Upsert Create
     order: z.number().optional(),
     updatedAt: z.string().datetime({ offset: true }),
   })).default([]),
