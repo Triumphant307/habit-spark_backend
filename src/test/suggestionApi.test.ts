@@ -8,6 +8,14 @@ if (!process.env.JWT_SECRET) {
 
 const { default: app } = await import('../app.js');
 
+interface SuggestionResponse {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  favoritedBy: { userId: string }[];
+}
+
 describe('Suggestions API Integration Tests', () => {
   let authToken: string;
   let userId: string;
@@ -66,7 +74,7 @@ describe('Suggestions API Integration Tests', () => {
       expect(res.status).toBe(200);
       expect(res.body.data[0].category).toBe('Productivity');
       // Should not contain mindfulness
-      expect(res.body.data.every((s: any) => s.category === 'Productivity')).toBe(true);
+      expect(res.body.data.every((s: SuggestionResponse) => s.category === 'Productivity')).toBe(true);
     });
 
     test('should search by query string (case-insensitive)', async () => {
@@ -97,7 +105,7 @@ describe('Suggestions API Integration Tests', () => {
         .get('/suggestions')
         .set('Authorization', `Bearer ${authToken}`);
       
-      const favoritedTip = listRes.body.data.find((s: any) => s.id === tipId);
+      const favoritedTip = listRes.body.data.find((s: SuggestionResponse) => s.id === tipId);
       expect(favoritedTip.favoritedBy.length).toBe(1);
       expect(favoritedTip.favoritedBy[0].userId).toBe(userId);
     });
@@ -114,7 +122,7 @@ describe('Suggestions API Integration Tests', () => {
         .get('/suggestions')
         .set('Authorization', `Bearer ${authToken}`);
       
-      const favoritedTip = listRes.body.data.find((s: any) => s.id === tipId);
+      const favoritedTip = listRes.body.data.find((s: SuggestionResponse) => s.id === tipId);
       expect(favoritedTip.favoritedBy.length).toBe(0);
     });
   });

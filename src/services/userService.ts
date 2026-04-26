@@ -1,5 +1,4 @@
 import * as userRepository from '../repositories/userRepository.js';
-import * as habitRepository from '../repositories/habitRepository.js';
 import { createHabit } from '../domain/habit.js';
 import { OnboardingInput, UpdatePreferencesInput } from '../validators/userValidators.js';
 import { prisma } from '../config/database.js';
