@@ -34,6 +34,6 @@ export const validate =
     } else {
       req.body = result.data;
     }
-    
+
     next();
   };

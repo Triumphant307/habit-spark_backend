@@ -12,23 +12,31 @@ export const syncQuerySchema = z.object({
  * Validates the Push Sync request.
  */
 export const pushSyncSchema = z.object({
-  habits: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    icon: z.string(),
-    target: z.number(),
-    category: z.string(),
-    startDate: z.string().datetime({ offset: true }), // Required for Upsert Create
-    order: z.number().optional(),
-    updatedAt: z.string().datetime({ offset: true }),
-  })).default([]),
-  
-  entries: z.array(z.object({
-    id: z.string(),
-    habitId: z.string(),
-    date: z.string().datetime({ offset: true }),
-    updatedAt: z.string().datetime({ offset: true }),
-  })).default([]),
+  habits: z
+    .array(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        icon: z.string(),
+        target: z.number(),
+        category: z.string(),
+        startDate: z.string().datetime({ offset: true }), // Required for Upsert Create
+        order: z.number().optional(),
+        updatedAt: z.string().datetime({ offset: true }),
+      }),
+    )
+    .default([]),
+
+  entries: z
+    .array(
+      z.object({
+        id: z.string(),
+        habitId: z.string(),
+        date: z.string().datetime({ offset: true }),
+        updatedAt: z.string().datetime({ offset: true }),
+      }),
+    )
+    .default([]),
 
   deletedIds: z.array(z.string()).default([]),
 });

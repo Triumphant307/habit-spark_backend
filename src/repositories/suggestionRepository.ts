@@ -32,8 +32,8 @@ export const findMany = async (userId: string, query: SuggestionQuery) => {
     where: buildWhereClause(query),
     include: {
       favoritedBy: {
-        where: { userId }
-      }
+        where: { userId },
+      },
     },
     take,
     skip,

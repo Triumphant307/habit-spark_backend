@@ -1,6 +1,9 @@
 import * as userRepository from '../repositories/userRepository.js';
 import { createHabit } from '../domain/habit.js';
-import { OnboardingInput, UpdatePreferencesInput } from '../validators/userValidators.js';
+import {
+  OnboardingInput,
+  UpdatePreferencesInput,
+} from '../validators/userValidators.js';
 import { prisma } from '../config/database.js';
 import { AppError } from '../utils/errors.js';
 
@@ -8,7 +11,10 @@ import { AppError } from '../utils/errors.js';
  * Orchestrates the completion of the 5-step onboarding wizard.
  * Uses a transaction to ensure all-or-nothing setup.
  */
-export const completeOnboarding = async (userId: string, data: OnboardingInput) => {
+export const completeOnboarding = async (
+  userId: string,
+  data: OnboardingInput,
+) => {
   return await prisma.$transaction(async (tx) => {
     // 1. Update nickname in core User model
     await tx.user.update({
@@ -29,7 +35,9 @@ export const completeOnboarding = async (userId: string, data: OnboardingInput) 
     const habitData = createHabit({
       ...data.firstHabit,
       userId,
-      startDate: data.firstHabit.startDate ? new Date(data.firstHabit.startDate) : undefined,
+      startDate: data.firstHabit.startDate
+        ? new Date(data.firstHabit.startDate)
+        : undefined,
     });
 
     const firstHabit = await tx.habit.create({
@@ -54,6 +62,9 @@ export const getUserPreferences = async (userId: string) => {
 /**
  * Performs a partial update on theme or UI settings.
  */
-export const updateUserPreferences = async (userId: string, data: UpdatePreferencesInput) => {
+export const updateUserPreferences = async (
+  userId: string,
+  data: UpdatePreferencesInput,
+) => {
   return await userRepository.updatePreferences(userId, data);
 };

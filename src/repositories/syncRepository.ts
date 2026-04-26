@@ -76,14 +76,14 @@ export const applyPushDelta = async (userId: string, data: PushSyncInput) => {
         where: { id: { in: data.deletedIds }, userId },
         data: { deletedAt: now },
       });
-      
+
       // Also soft-delete entries associated with these habits
       await tx.habitEntry.updateMany({
         where: { habitId: { in: data.deletedIds } },
         data: { deletedAt: now },
       });
     }
-    
+
     return { success: true };
   });
 };

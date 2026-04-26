@@ -19,14 +19,16 @@ describe('User API Integration Tests', () => {
         email: 'onboard-test@example.com',
         passwordHash: 'hashed',
         preferences: {
-            create: {}
-        }
+          create: {},
+        },
       },
     });
     userId = user.id;
 
     const jwt = (await import('jsonwebtoken')).default;
-    authToken = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterAll(async () => {
@@ -44,8 +46,8 @@ describe('User API Integration Tests', () => {
           title: 'Morning Pushups',
           icon: '💪',
           category: 'Fitness',
-          target: 10
-        }
+          target: 10,
+        },
       };
 
       const res = await request(app)
@@ -60,7 +62,7 @@ describe('User API Integration Tests', () => {
       // Verify DB state
       const updatedUser = await prisma.user.findUnique({
         where: { id: userId },
-        include: { preferences: true, habits: true }
+        include: { preferences: true, habits: true },
       });
 
       expect(updatedUser?.name).toBe('TJ');

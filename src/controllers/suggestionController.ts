@@ -10,12 +10,14 @@ export const getSuggestions = async (
   res: Response,
   next: NextFunction,
 ) => {
-
   try {
     const userId = req.userId as string;
-  const query = req.query; 
+    const query = req.query;
     // TODO: Call suggestionService.listSuggestions with req.query
-    const results = await suggestionService.listSuggestions(userId, query as unknown as SuggestionQuery);
+    const results = await suggestionService.listSuggestions(
+      userId,
+      query as unknown as SuggestionQuery,
+    );
     res.status(200).json(results);
   } catch (error) {
     next(error);
@@ -56,4 +58,3 @@ export const getCategories = async (
     next(error);
   }
 };
-

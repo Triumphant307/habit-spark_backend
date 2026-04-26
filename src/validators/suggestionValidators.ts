@@ -1,8 +1,14 @@
 import { z } from 'zod';
 
 export const suggestionQuerySchema = z.object({
-  page: z.string().optional().transform(val => parseInt(val || '1')),
-  limit: z.string().optional().transform(val => parseInt(val || '20')),
+  page: z
+    .string()
+    .optional()
+    .transform((val) => parseInt(val || '1')),
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => parseInt(val || '20')),
   q: z.string().optional(),
   category: z.string().optional(),
 });
