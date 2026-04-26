@@ -13,8 +13,30 @@ const router = Router();
 router.use(authenticate);
 
 /**
- * Route: GET /suggestions
- * Supports query params: page, limit, q, category
+ * @openapi
+ * /suggestions:
+ *   get:
+ *     tags: [Suggestions]
+ *     summary: Fetch curated habit tips
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *       - in: query
+ *         name: q
+ *         description: Text search for title/description
+ *         schema: { type: string }
+ *       - in: query
+ *         name: category
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Paginated list of suggestions
  */
 router.get(
   '/',
@@ -23,8 +45,26 @@ router.get(
 );
 
 /**
- * Route: POST /suggestions/fav
- * Payload: { tipId: string, isFavorite: boolean }
+ * @openapi
+ * /suggestions/fav:
+ *   post:
+ *     tags: [Suggestions]
+ *     summary: Toggle favorite status for a tip
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [tipId, isFavorite]
+ *             properties:
+ *               tipId: { type: string }
+ *               isFavorite: { type: boolean }
+ *     responses:
+ *       200:
+ *         description: Favorite toggled successfully
  */
 router.post(
   '/fav',
@@ -33,7 +73,16 @@ router.post(
 );
 
 /**
- * Route: GET /suggestions/categories
+ * @openapi
+ * /suggestions/categories:
+ *   get:
+ *     tags: [Suggestions]
+ *     summary: Get list of available suggestion categories
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Array of category strings
  */
 router.get('/categories', suggestionController.getCategories);
 

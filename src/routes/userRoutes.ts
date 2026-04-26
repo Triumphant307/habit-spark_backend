@@ -13,7 +13,35 @@ const router = Router();
 router.use(authenticate);
 
 /**
- * Route: POST /user/onboarding
+ * @openapi
+ * /user/onboarding:
+ *   post:
+ *     tags: [User]
+ *     summary: Complete the 5-step onboarding wizard
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [nickname, goal, commitment, firstHabit]
+ *             properties:
+ *               nickname: { type: string }
+ *               goal: { type: string }
+ *               commitment: { type: string }
+ *               firstHabit:
+ *                 type: object
+ *                 required: [title, icon, category]
+ *                 properties:
+ *                   title: { type: string }
+ *                   icon: { type: string }
+ *                   category: { type: string }
+ *                   target: { type: number, default: 7 }
+ *     responses:
+ *       200:
+ *         description: Onboarding completed successfully
  */
 router.post(
   '/onboarding',
@@ -22,12 +50,39 @@ router.post(
 );
 
 /**
- * Route: GET /user/preferences
+ * @openapi
+ * /user/preferences:
+ *   get:
+ *     tags: [User]
+ *     summary: Get user UI preferences
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User preference data
  */
 router.get('/preferences', userController.getPreferences);
 
 /**
- * Route: PATCH /user/preferences
+ * @openapi
+ * /user/preferences:
+ *   patch:
+ *     tags: [User]
+ *     summary: Update user UI preferences
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               theme: { type: string, enum: [light, dark] }
+ *               sidebarCollapsed: { type: boolean }
+ *     responses:
+ *       200:
+ *         description: Preferences updated successfully
  */
 router.patch(
   '/preferences',
