@@ -1,4 +1,5 @@
 import * as syncRepo from '../repositories/syncRepository.js';
+import { PushSyncInput } from '../validators/syncValidators.js';
 
 /**
  * Calculates the delta (changes) since the last sync.
@@ -28,4 +29,11 @@ export const getFullDelta = async (userId: string, sinceStr?: string) => {
     },
     lastSync: now.toISOString()
   };
+};
+
+/**
+ * Processes incoming changes from the client and applies them to the database.
+ */
+export const processPushSync = async (userId: string, data: PushSyncInput) => {
+  return await syncRepo.applyPushDelta(userId, data);
 };

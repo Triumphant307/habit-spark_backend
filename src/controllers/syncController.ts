@@ -20,3 +20,21 @@ export const pullSync = async (
     next(error);
   }
 };
+
+/**
+ * Handles POST /sync.
+ * Uploads local changes from the client to the server.
+ */
+export const pushSync = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.userId as string;
+    const result = await syncService.processPushSync(userId, req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
