@@ -30,6 +30,7 @@ export const completeOnboarding = async (userId: string, data: OnboardingInput) 
     const habitData = createHabit({
       ...data.firstHabit,
       userId,
+      startDate: data.firstHabit.startDate ? new Date(data.firstHabit.startDate) : undefined,
     });
 
     const firstHabit = await tx.habit.create({
