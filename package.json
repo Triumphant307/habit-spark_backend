@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/server.ts",
   "scripts": {
-    "start": "tsc && node dist/server.js",
+    "start": "node dist/server.js",
     "build": "tsc",
     "dev": "tsx watch src/server.ts",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
