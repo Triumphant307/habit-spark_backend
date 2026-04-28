@@ -7,7 +7,8 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: 'HabitSpark 2.0 API',
       version: '1.0.0',
-      description: 'A professional REST API for habit tracking and cloud synchronization.',
+      description:
+        'A professional REST API for habit tracking and cloud synchronization.',
     },
     servers: [
       {
