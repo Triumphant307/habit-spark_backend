@@ -1,9 +1,9 @@
 import { env } from './config/env.js';
 import express from 'express';
 import cors from 'cors';
-import { rateLimit } from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
+import { apiLimiter, authLimiter } from './config/rateLimit.js';
 import habitRoutes from './routes/habitRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -26,31 +26,6 @@ app.use(
 );
 
 app.use(express.json());
-
-// Rate Limiting
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Limit each IP to 100 requests per `window`
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: {
-    status: 429,
-    message:
-      'Too many requests from this IP, please try again after 15 minutes',
-  },
-});
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 20, // Stricter limit for auth: 20 requests per 15 minutes
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: {
-    status: 429,
-    message:
-      'Too many authentication attempts, please try again after 15 minutes',
-  },
-});
 
 app.get('/', (req, res) => {
   res.json({ message: 'Server is running' });
