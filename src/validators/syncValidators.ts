@@ -16,10 +16,10 @@ export const pushSyncSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        title: z.string(),
-        icon: z.string(),
+        title: z.string().trim(),
+        icon: z.string().trim(),
         target: z.number(),
-        category: z.string(),
+        category: z.string().trim(),
         startDate: z.string().datetime({ offset: true }), // Required for Upsert Create
         order: z.number().optional(),
         updatedAt: z.string().datetime({ offset: true }),
