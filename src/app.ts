@@ -23,6 +23,9 @@ app.use(requestId);
 app.use(
   cors({
     origin: env.FRONTEND_URL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200,
   }),
 );
 
