@@ -4,9 +4,9 @@ import { rateLimit } from 'express-rate-limit';
  * General API rate limiter.
  * Limits each IP to 100 requests per 15 minutes.
  */
-export const apiLimiter = rateLimit({
+export const defaultLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100,
+  limit: 1000,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: {
@@ -29,5 +29,16 @@ export const authLimiter = rateLimit({
     status: 429,
     message:
       'Too many authentication attempts, please try again after 15 minutes',
+  },
+});
+
+export const syncLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 500,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    message: 'Too many sync requests, please try again after 15 minutes',
   },
 });

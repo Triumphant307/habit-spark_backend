@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
-import { apiLimiter, authLimiter } from './config/rateLimit.js';
+import * as rateLimiter from './config/rateLimit.js';
 import habitRoutes from './routes/habitRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -35,8 +35,9 @@ app.get('/', (req, res) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Apply rate limiting
-app.use('/auth', authLimiter);
-app.use(apiLimiter);
+app.use('/auth', rateLimiter.authLimiter);
+app.use('/', rateLimiter.defaultLimiter);
+app.use('/sync', rateLimiter.syncLimiter);
 
 // Routes
 app.use('/auth', authRoutes);
