@@ -34,17 +34,14 @@ app.get('/', (req, res) => {
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Apply rate limiting
-app.use('/auth', rateLimiter.authLimiter);
-app.use('/', rateLimiter.defaultLimiter);
-app.use('/sync', rateLimiter.syncLimiter);
+// Routes with specific rate limiting
+app.use('/auth', rateLimiter.authLimiter, authRoutes);
+app.use('/sync', rateLimiter.syncLimiter, syncRoutes);
 
-// Routes
-app.use('/auth', authRoutes);
-app.use('/habits', habitRoutes);
-app.use('/user', userRoutes);
-app.use('/suggestions', suggestionRoutes);
-app.use('/sync', syncRoutes);
+// Routes with default rate limiting
+app.use('/habits', rateLimiter.defaultLimiter, habitRoutes);
+app.use('/user', rateLimiter.defaultLimiter, userRoutes);
+app.use('/suggestions', rateLimiter.defaultLimiter, suggestionRoutes);
 
 // Error Handling Middleware
 app.use(notFound);
