@@ -4,7 +4,9 @@ import { z } from 'zod';
 export const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
-  JWT_EXPIRES_IN: z.string().default('7d'),
+  JWT_EXPIRES_IN: z.string().default('15m'),
+  REFRESH_TOKEN_SECRET: z.string().min(1, 'REFRESH_TOKEN_SECRET is required'),
+  REFRESH_TOKEN_EXPIRES_IN: z.string().default('7d'),
   PORT: z.coerce.number().default(5000),
   NODE_ENV: z
     .enum(['development', 'production', 'test'])

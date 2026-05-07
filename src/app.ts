@@ -1,6 +1,7 @@
 import { env } from './config/env.js';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
 import * as rateLimiter from './config/rateLimit.js';
@@ -25,10 +26,12 @@ app.use(
     origin: env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
     optionsSuccessStatus: 200,
   }),
 );
 
+app.use(cookieParser());
 app.use(express.json());
 
 app.get('/', (req, res) => {

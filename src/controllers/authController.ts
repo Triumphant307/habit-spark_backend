@@ -1,5 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/authService.js';
+import { env } from '../config/env.js';
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: env.NODE_ENV === 'production',
+  sameSite: 'none' as const, // Critical for cross-origin cookies
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
 
 /**
  * Handles POST /auth/signup.
@@ -10,11 +18,16 @@ export const signup = async (
   next: NextFunction,
 ) => {
   try {
-    const result = await authService.signup(req.body);
+    const { user, accessToken, refreshToken } = await authService.signup(
+      req.body,
+    );
+
+    res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
 
     res.status(201).json({
       message: 'User registered successfully',
-      ...result,
+      user,
+      token: accessToken,
     });
   } catch (error) {
     next(error);
@@ -30,11 +43,45 @@ export const login = async (
   next: NextFunction,
 ) => {
   try {
-    const result = await authService.login(req.body);
+    const { user, accessToken, refreshToken } = await authService.login(
+      req.body,
+    );
+
+    res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
 
     res.status(200).json({
       message: 'Login successful',
-      ...result,
+      user,
+      token: accessToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Handles POST /auth/refresh.
+ */
+export const refresh = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const oldRefreshToken = req.cookies.refreshToken;
+
+    if (!oldRefreshToken) {
+      res.status(401).json({ message: 'No refresh token provided' });
+      return;
+    }
+
+    const { accessToken, refreshToken } =
+      await authService.refresh(oldRefreshToken);
+
+    res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+
+    res.status(200).json({
+      token: accessToken,
     });
   } catch (error) {
     next(error);
@@ -61,12 +108,19 @@ export const getMe = async (
  * Handles POST /auth/logout.
  */
 export const logout = async (
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const result = await authService.logout();
+    const refreshToken = req.cookies.refreshToken;
+    const result = await authService.logout(refreshToken);
+
+    res.clearCookie('refreshToken', {
+      ...COOKIE_OPTIONS,
+      maxAge: 0,
+    });
+
     res.status(200).json(result);
   } catch (error) {
     next(error);

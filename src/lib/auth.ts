@@ -36,32 +36,50 @@ export const comparePassword = async (
 };
 
 /**
- * Generates a signed JWT for a given user ID.
- *
- * @param userId - The unique identifier of the user to include in the payload.
- * @returns A signed JWT string.
- * @throws Error if JWT_SECRET is not defined in environment variables.
+ * Generates a signed Access Token (short-lived).
  */
-export const generateToken = (userId: string): string => {
+export const generateAccessToken = (userId: string): string => {
   const secret = env.JWT_SECRET;
-
-  // We cast the expiresIn value to the expected type from the jsonwebtoken library.
-  // This is necessary because process.env variables are typed as 'string | undefined',
-  // and the library expects a specific 'StringValue' type (like '1h' or '7d').
   const expiresIn = env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'];
 
   return jwt.sign({ userId }, secret, { expiresIn });
 };
 
 /**
- * Verifies a JWT and decodes its payload.
- *
- * @param token - The JWT string to verify.
- * @returns The decoded payload containing the userId.
- * @throws Error if JWT_SECRET is not defined or the token is invalid/expired.
+ * Generates a signed Refresh Token (long-lived).
  */
-export const verifyToken = (token: string) => {
-  const secret = env.JWT_SECRET;
+export const generateRefreshToken = (userId: string): string => {
+  const secret = env.REFRESH_TOKEN_SECRET;
+  const expiresIn =
+    env.REFRESH_TOKEN_EXPIRES_IN as jwt.SignOptions['expiresIn'];
 
+  return jwt.sign({ userId }, secret, { expiresIn });
+};
+
+/**
+ * Verifies an Access Token.
+ */
+export const verifyAccessToken = (token: string) => {
+  const secret = env.JWT_SECRET;
   return jwt.verify(token, secret) as { userId: string };
 };
+
+/**
+ * Verifies a Refresh Token.
+ */
+export const verifyRefreshToken = (token: string) => {
+  const secret = env.REFRESH_TOKEN_SECRET;
+  return jwt.verify(token, secret) as { userId: string };
+};
+
+/**
+ * Legacy support for backward compatibility.
+ * @deprecated Use generateAccessToken instead.
+ */
+export const generateToken = generateAccessToken;
+
+/**
+ * Legacy support for backward compatibility.
+ * @deprecated Use verifyAccessToken instead.
+ */
+export const verifyToken = verifyAccessToken;
