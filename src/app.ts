@@ -11,6 +11,7 @@ import suggestionRoutes from './routes/suggestionRoutes.js';
 import syncRoutes from './routes/syncRoutes.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import { requestId } from './middleware/requestId.js';
+import { timeoutMiddleware } from './middleware/timeoutMiddleware.js';
 
 const app = express();
 
@@ -35,13 +36,28 @@ app.get('/', (req, res) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes with specific rate limiting
-app.use('/auth', rateLimiter.authLimiter, authRoutes);
-app.use('/sync', rateLimiter.syncLimiter, syncRoutes);
+app.use('/auth', rateLimiter.authLimiter, timeoutMiddleware(10000), authRoutes);
+app.use('/sync', rateLimiter.syncLimiter, timeoutMiddleware(15000), syncRoutes);
 
 // Routes with default rate limiting
-app.use('/habits', rateLimiter.defaultLimiter, habitRoutes);
-app.use('/user', rateLimiter.defaultLimiter, userRoutes);
-app.use('/suggestions', rateLimiter.defaultLimiter, suggestionRoutes);
+app.use(
+  '/habits',
+  rateLimiter.defaultLimiter,
+  timeoutMiddleware(20000),
+  habitRoutes,
+);
+app.use(
+  '/user',
+  rateLimiter.defaultLimiter,
+  timeoutMiddleware(20000),
+  userRoutes,
+);
+app.use(
+  '/suggestions',
+  rateLimiter.defaultLimiter,
+  timeoutMiddleware(20000),
+  suggestionRoutes,
+);
 
 // Error Handling Middleware
 app.use(notFound);
