@@ -69,6 +69,7 @@ jobs:
       DATABASE_URL: postgresql://test:test@localhost:5432/habitspark_test
       NODE_ENV: test
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
 
     steps:
       - name: Checkout source
