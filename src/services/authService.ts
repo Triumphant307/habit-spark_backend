@@ -75,10 +75,9 @@ export const login = async (data: LoginInput) => {
  */
 export const refresh = async (oldRefreshToken: string) => {
   // 1. Verify the token (JWT signature)
-  let decoded;
   try {
-    decoded = verifyRefreshToken(oldRefreshToken);
-  } catch (err) {
+    verifyRefreshToken(oldRefreshToken);
+  } catch {
     throw new AppError('Invalid refresh token', 401);
   }
 
@@ -123,7 +122,7 @@ export const logout = async (refreshToken?: string) => {
   if (refreshToken) {
     try {
       await authRepository.deleteRefreshToken(refreshToken);
-    } catch (err) {
+    } catch {
       // Token might not exist, ignore
     }
   }
