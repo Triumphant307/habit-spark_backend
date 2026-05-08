@@ -91,3 +91,23 @@ jobs:
 
       - name: Run test suite
         run: npm test
+
+  # ── Job 3: Gated Deployment (ONLY if Job 1 & 2 pass) ───────────────
+  deploy:
+    name: Deploy to Railway
+    needs: [quality, test]
+    # Only deploy when pushing to the main branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
