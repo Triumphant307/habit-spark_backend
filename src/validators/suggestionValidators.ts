@@ -9,12 +9,12 @@ export const suggestionQuerySchema = z.object({
     .string()
     .optional()
     .transform((val) => parseInt(val || '20')),
-  q: z.string().optional(),
-  category: z.string().optional(),
+  q: z.string().trim().optional(),
+  category: z.string().trim().optional(),
 });
 
 export const toggleFavoriteSchema = z.object({
-  tipId: z.string().min(1, 'Tip ID is required'),
+  tipId: z.string().trim().min(1, 'Tip ID is required'),
   isFavorite: z.boolean(),
 });
 

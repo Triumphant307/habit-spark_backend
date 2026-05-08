@@ -6,6 +6,9 @@ import logger from '../lib/logger.js';
 if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = 'test-secret';
 }
+if (!process.env.REFRESH_TOKEN_SECRET) {
+  process.env.REFRESH_TOKEN_SECRET = 'test-refresh-secret';
+}
 
 const { default: app } = await import('../app.js');
 

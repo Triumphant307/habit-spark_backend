@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 // Set environment variable for testing before importing anything that might use it
 const SECRET = 'test-secret';
 process.env.JWT_SECRET = SECRET;
+process.env.REFRESH_TOKEN_SECRET = 'test-refresh-secret';
 
 // We still use dynamic imports to be safe with process.env changes
 const { authenticate } = await import('../middleware/authenticate.js');

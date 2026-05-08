@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../lib/auth.js';
+import { verifyAccessToken } from '../lib/auth.js';
 import logger from '../lib/logger.js';
 
 /**
@@ -25,7 +25,7 @@ export const authenticate = (
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = verifyToken(token);
+    const decoded = verifyAccessToken(token);
     req.userId = decoded.userId;
     next();
   } catch (error) {

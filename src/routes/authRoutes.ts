@@ -57,12 +57,24 @@ router.post('/login', validate(loginSchema), authController.login);
 
 /**
  * @openapi
+ * /auth/refresh:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Refresh access token using rotation
+ *     responses:
+ *       200:
+ *         description: New access token issued
+ *       401:
+ *         description: Refresh token invalid or expired
+ */
+router.post('/refresh', authController.refresh);
+
+/**
+ * @openapi
  * /auth/logout:
  *   post:
  *     tags: [Authentication]
  *     summary: Invalidate user session
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Logged out successfully

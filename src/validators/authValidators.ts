@@ -5,16 +5,16 @@ import { z } from 'zod';
  * Ensures data quality and provides types for the rest of the application.
  */
 export const signupSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  email: z.string().trim().email('Invalid email format'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
-  nickname: z.string().optional(),
+  nickname: z.string().trim().optional(),
 });
 
 /**
  * Schema for user login.
  */
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  email: z.string().trim().email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),
 });
 

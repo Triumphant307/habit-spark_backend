@@ -3,6 +3,7 @@ import { createHabit, calculateStreak } from '../domain/habit.js';
 import * as habitRepository from '../repositories/habitRepository.js';
 import { HabitWithHistory } from '../repositories/habitRepository.js';
 import { AppError } from '../utils/errors.js';
+import logger from '../lib/logger.js';
 
 // Input type for updateHabit — all fields are optional since PATCH is partial
 interface UpdateHabitData {
@@ -39,6 +40,11 @@ export const addHabit = async (
   data: Parameters<typeof createHabit>[0],
 ): Promise<Habit> => {
   const habit = createHabit(data);
+
+  logger.info(
+    { title: habit.title, userId: habit.userId },
+    'Creating new habit',
+  );
   return await habitRepository.save(habit);
 };
 
@@ -76,6 +82,17 @@ export const completeHabit = async (
 
   const streak = calculateStreak(entryDates, referenceDate);
   const updatedHabit = await habitRepository.updateStreak(id, streak);
+
+  logger.info(
+    {
+      habitId: habit.id,
+      userId: habit.userId,
+      action: existing ? 'unmarked' : 'completed',
+      date: referenceDate.toISOString().split('T')[0],
+      streak,
+    },
+    'Habit completion toggled',
+  );
   return { habit: updatedHabit, isNowCompleted: !existing, streak };
 };
 
