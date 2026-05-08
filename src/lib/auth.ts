@@ -7,6 +7,7 @@
 import { env } from '../config/env.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { randomUUID } from 'node:crypto';
 
 const SALT_ROUNDS = env.BCRYPT_SALT_ROUNDS;
 
@@ -42,7 +43,7 @@ export const generateAccessToken = (userId: string): string => {
   const secret = env.JWT_SECRET;
   const expiresIn = env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'];
 
-  return jwt.sign({ userId }, secret, { expiresIn });
+  return jwt.sign({ userId, jti: randomUUID() }, secret, { expiresIn });
 };
 
 /**
@@ -53,7 +54,7 @@ export const generateRefreshToken = (userId: string): string => {
   const expiresIn =
     env.REFRESH_TOKEN_EXPIRES_IN as jwt.SignOptions['expiresIn'];
 
-  return jwt.sign({ userId }, secret, { expiresIn });
+  return jwt.sign({ userId, jti: randomUUID() }, secret, { expiresIn });
 };
 
 /**

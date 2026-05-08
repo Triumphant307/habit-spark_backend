@@ -79,7 +79,7 @@ router.post('/refresh', authController.refresh);
  *       200:
  *         description: Logged out successfully
  */
-router.post('/logout', authController.logout);
+router.post('/logout', authenticate, authController.logout);
 
 /**
  * @openapi

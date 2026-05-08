@@ -9,6 +9,7 @@ import {
 } from '../lib/auth.js';
 import { SignupInput, LoginInput } from '../validators/authValidators.js';
 import { AppError } from '../utils/errors.js';
+import logger from '../lib/logger.js';
 
 /**
  * Handles the signup of a new user.
@@ -35,6 +36,8 @@ export const signup = async (data: SignupInput) => {
     userId: user.id,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
   });
+
+  logger.info({ userId: user.id, email: user.email }, 'User signed up');
 
   return { user, accessToken, refreshToken };
 };
@@ -66,6 +69,8 @@ export const login = async (data: LoginInput) => {
     userId: user.id,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
   });
+
+  logger.info({ userId: user.id, email: user.email }, 'User logged in');
 
   return { user, accessToken, refreshToken };
 };
@@ -101,6 +106,8 @@ export const refresh = async (oldRefreshToken: string) => {
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   });
 
+  logger.info({ userId: user.id, email: user.email }, 'User token rotated');
+
   return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 };
 
@@ -126,5 +133,7 @@ export const logout = async (refreshToken?: string) => {
       // Token might not exist, ignore
     }
   }
+  logger.info({ refreshToken: refreshToken }, 'User logged out successfully');
+
   return { message: 'Logged out successfully' };
 };
