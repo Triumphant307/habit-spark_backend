@@ -13,6 +13,7 @@ export const envSchema = z.object({
     .default('development'),
   BCRYPT_SALT_ROUNDS: z.coerce.number().default(10),
   FRONTEND_URL: z.string().default('http://localhost:3000'),
+  GOOGLE_CLIENT_ID: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

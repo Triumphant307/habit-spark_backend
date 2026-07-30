@@ -65,3 +65,45 @@ export const updatePreferences = async (
     data,
   });
 };
+
+/**
+ * Finds a user in the database by their Google ID.
+ */
+export const findUserByGoogleId = async (googleId: string) => {
+  return await prisma.user.findUnique({
+    where: { googleId },
+    include: { preferences: true },
+  });
+};
+
+/**
+ * Creates a new user via Google OAuth with default preferences.
+ */
+export const createGoogleUser = async (data: {
+  email: string;
+  name: string;
+  googleId: string;
+}) => {
+  return await prisma.user.create({
+    data: {
+      email: data.email,
+      name: data.name,
+      googleId: data.googleId,
+      preferences: {
+        create: {},
+      },
+    },
+    include: { preferences: true },
+  });
+};
+
+/**
+ * Links a Google account to an existing user profile by updating their googleId.
+ */
+export const linkGoogleAccount = async (id: string, googleId: string) => {
+  return await prisma.user.update({
+    where: { id },
+    data: { googleId },
+    include: { preferences: true },
+  });
+};

@@ -126,3 +126,28 @@ export const logout = async (
     next(error);
   }
 };
+
+/**
+ * Handles POST /auth/google.
+ */
+export const googleLogin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { idToken } = req.body;
+    const { user, accessToken, refreshToken } =
+      await authService.googleLogin(idToken);
+
+    res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+
+    res.status(200).json({
+      message: 'Google login successful',
+      user,
+      token: accessToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

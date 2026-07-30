@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { signupSchema, loginSchema } from '../validators/authValidators.js';
+import {
+  signupSchema,
+  loginSchema,
+  googleLoginSchema,
+} from '../validators/authValidators.js';
 import { validate } from '../middleware/validate.js';
 import * as authController from '../controllers/authController.js';
 import { authenticate } from '../middleware/authenticate.js';
@@ -54,6 +58,29 @@ router.post('/signup', validate(signupSchema), authController.signup);
  *         description: Invalid credentials
  */
 router.post('/login', validate(loginSchema), authController.login);
+
+/**
+ * @openapi
+ * /auth/google:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Authenticate user using Google ID Token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [idToken]
+ *             properties:
+ *               idToken: { type: string }
+ *     responses:
+ *       200:
+ *         description: Google login successful
+ *       401:
+ *         description: Invalid Google token
+ */
+router.post('/google', validate(googleLoginSchema), authController.googleLogin);
 
 /**
  * @openapi

@@ -17,7 +17,8 @@ model User {
   id                  String   @id @default(cuid())
   email               String   @unique
   name                String?
-  passwordHash        String
+  passwordHash        String?  // Made optional to support OAuth-only accounts
+  googleId            String?  @unique // Unique identifier for Google OAuth
 
   // Relations
   preferences         UserPreference?

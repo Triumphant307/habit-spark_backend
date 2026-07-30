@@ -1,3 +1,5 @@
+import { OAuth2Client } from 'google-auth-library';
+import { env } from '../config/env.js';
 import * as userRepository from '../repositories/userRepository.js';
 import * as authRepository from '../repositories/authRepository.js';
 import {
@@ -50,6 +52,14 @@ export const login = async (data: LoginInput) => {
 
   if (!user) {
     throw new AppError('Invalid email or password', 401);
+  }
+
+  // Prevent crashes if the user registered via Google OAuth (has no password)
+  if (!user.passwordHash) {
+    throw new AppError(
+      'This account was created via Google. Please log in using Google.',
+      401,
+    );
   }
 
   const isPasswordValid = await comparePassword(
@@ -136,4 +146,82 @@ export const logout = async (refreshToken?: string) => {
   logger.info({ refreshToken: refreshToken }, 'User logged out successfully');
 
   return { message: 'Logged out successfully' };
+};
+
+// Lazy initialization of OAuth2Client to avoid crashes if GOOGLE_CLIENT_ID is not configured yet
+let googleClient: OAuth2Client | null = null;
+const getGoogleClient = () => {
+  if (!googleClient) {
+    const clientId = env.GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      throw new AppError('Google OAuth is not configured on this server', 500);
+    }
+    googleClient = new OAuth2Client(clientId);
+  }
+  return googleClient;
+};
+
+/**
+ * Handles validation of Google ID token and issues system JWT tokens.
+ */
+export const googleLogin = async (idToken: string) => {
+  let payload;
+  try {
+    const client = getGoogleClient();
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: env.GOOGLE_CLIENT_ID,
+    });
+    payload = ticket.getPayload();
+  } catch (error) {
+    logger.error({ error }, 'Google ID Token verification failed');
+    throw new AppError('Invalid Google token signature or configuration', 401);
+  }
+
+  if (!payload || !payload.email || !payload.sub) {
+    throw new AppError('Incomplete profile info from Google', 400);
+  }
+
+  const { email, sub: googleId, name } = payload;
+
+  // 1. Find user by googleId
+  let user = await userRepository.findUserByGoogleId(googleId);
+
+  if (!user) {
+    // 2. Check if user already exists with the same email
+    const existingUser = await userRepository.findUserByEmail(email);
+
+    if (existingUser) {
+      // Link the existing account to Google
+      user = await userRepository.linkGoogleAccount(existingUser.id, googleId);
+      logger.info(
+        { userId: user.id },
+        'Linked Google credentials to existing local account',
+      );
+    } else {
+      // 3. Create a brand new passwordless account
+      user = await userRepository.createGoogleUser({
+        email,
+        name: name || email.split('@')[0],
+        googleId,
+      });
+      logger.info(
+        { userId: user.id },
+        'Created brand new user via Google OAuth',
+      );
+    }
+  }
+
+  // 4. Generate local authentication tokens
+  const accessToken = generateAccessToken(user.id);
+  const refreshToken = generateRefreshToken(user.id);
+
+  // Store refresh token in DB
+  await authRepository.createRefreshToken({
+    token: refreshToken,
+    userId: user.id,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+  });
+
+  return { user, accessToken, refreshToken };
 };

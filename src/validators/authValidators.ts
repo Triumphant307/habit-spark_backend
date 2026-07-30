@@ -18,6 +18,14 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+/**
+ * Schema for Google OAuth login.
+ */
+export const googleLoginSchema = z.object({
+  idToken: z.string().trim().min(1, 'ID Token is required'),
+});
+
 // Infer types from the schemas
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type GoogleLoginInput = z.infer<typeof googleLoginSchema>;
